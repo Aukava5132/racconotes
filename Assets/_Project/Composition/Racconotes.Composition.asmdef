@@ -1,0 +1,18 @@
+{
+    "name": "Racconotes.Composition",
+    "rootNamespace": "Racconotes.Composition",
+    "references": [
+        "Racconotes.Application",
+        "Racconotes.Domain",
+        "Racconotes.Infrastructure"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
