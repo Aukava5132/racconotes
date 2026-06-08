@@ -1,0 +1,17 @@
+{
+    "name": "Racconotes.Presentation",
+    "rootNamespace": "Racconotes.Presentation",
+    "references": [
+        "Racconotes.Application",
+        "Racconotes.Domain"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
