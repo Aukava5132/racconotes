@@ -6,7 +6,11 @@
         "UnityEditor.TestRunner",
         "Gilzoide.SqliteNet",
         "Racconotes.Domain",
-        "Racconotes.Application"
+        "Racconotes.Application",
+        "Racconotes.Infrastructure",
+        "Racconotes.Composition",
+        "Racconotes.Presentation",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"
