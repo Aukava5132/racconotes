@@ -4,7 +4,8 @@
     "references": [
         "Racconotes.Application",
         "Racconotes.Domain",
-        "Racconotes.Infrastructure"
+        "Racconotes.Infrastructure",
+        "Gilzoide.SqliteNet"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
