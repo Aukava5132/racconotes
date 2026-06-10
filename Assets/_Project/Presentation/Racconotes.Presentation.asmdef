@@ -3,7 +3,8 @@
     "rootNamespace": "Racconotes.Presentation",
     "references": [
         "Racconotes.Application",
-        "Racconotes.Domain"
+        "Racconotes.Domain",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
