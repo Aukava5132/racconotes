@@ -11,6 +11,9 @@ namespace Racconotes.Domain.Repositories
     public interface INoteRepository
     {
         IEnumerable<Note> GetNotesForTrack(int trackId);
-        void BulkInsertNotes(IEnumerable<Note> notes);
+        Note GetNoteById(int noteId);
+        void AddNote(Note note);
+        void BulkInsertNotes(IEnumerable<Note> notes);            // для импорта MIDI
+        void UpdateNoteFinger(int noteId, int finger, string hand);
     }
 }
