@@ -1,0 +1,20 @@
+{
+    "name": "Racconotes.Infrastructure.Editor",
+    "rootNamespace": "Racconotes.Infrastructure.Editor",
+    "references": [
+        "Racconotes.Infrastructure",
+        "Racconotes.Domain",
+        "Gilzoide.SqliteNet"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
