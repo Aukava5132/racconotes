@@ -18,6 +18,7 @@ namespace Racconotes.Presentation
         private TrackSelectView _menu;
         private StatsView _stats;
         private SettingsView _settings;
+        private FingerEditorView _fingers;
         private GameplayController _gameplay;
 
         private void Start()
@@ -31,7 +32,7 @@ namespace Racconotes.Presentation
 
             _ctx = GameServices.Context;
             _menu = gameObject.AddComponent<TrackSelectView>();
-            _menu.Init(_ctx, DefaultUserId, OnTrackChosen, ShowStats, ShowSettings);
+            _menu.Init(_ctx, DefaultUserId, OnTrackChosen, ShowStats, ShowSettings, ShowFingerEditor);
 
             _stats = gameObject.AddComponent<StatsView>();
             _stats.Init(_ctx, DefaultUserId);
@@ -43,6 +44,11 @@ namespace Racconotes.Presentation
             _settings.Hide();
             _settings.OnBack += BackFromSettings;
             _settings.OnLibraryChanged += () => _menu.Refresh();
+
+            _fingers = gameObject.AddComponent<FingerEditorView>();
+            _fingers.Init(_ctx, DefaultUserId);
+            _fingers.Hide();
+            _fingers.OnBack += BackFromFingerEditor;
 
             ShowMenu();
         }
@@ -80,6 +86,18 @@ namespace Racconotes.Presentation
         private void BackFromSettings()
         {
             _settings.Hide();
+            ShowMenu();
+        }
+
+        private void ShowFingerEditor()
+        {
+            _menu.Hide();
+            _fingers.Show();
+        }
+
+        private void BackFromFingerEditor()
+        {
+            _fingers.Hide();
             ShowMenu();
         }
 

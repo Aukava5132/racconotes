@@ -26,13 +26,14 @@ namespace Racconotes.Composition
             var resultRepo = new SqliteResultRepository(conn);
             var statsQueries = new SqliteStatsQueries(conn);
             var settingsRepo = new SqliteUserSettingsRepository(conn);
+            var fingerRepo = new SqliteUserFingerAssignmentRepository(conn);
 
             var session = new SessionController(noteRepo, resultRepo, new GameEngine());
             var midiImport = new MidiImportService(trackRepo, noteRepo);
             var statsAnalyzer = new StatsAnalyzer();
 
             return new GameContext(
-                trackRepo, noteRepo, resultRepo, statsQueries, settingsRepo,
+                trackRepo, noteRepo, resultRepo, statsQueries, settingsRepo, fingerRepo,
                 session, midiImport, statsAnalyzer);
         }
     }

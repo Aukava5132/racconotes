@@ -43,6 +43,7 @@ namespace Racconotes.Tests
             Assert.IsNotNull(ctx.ResultRepository);
             Assert.IsNotNull(ctx.StatsQueries);
             Assert.IsNotNull(ctx.UserSettingsRepository);
+            Assert.IsNotNull(ctx.FingerAssignments);
             Assert.IsNotNull(ctx.Session);
             Assert.IsNotNull(ctx.MidiImport);
             Assert.IsNotNull(ctx.StatsAnalyzer);
@@ -55,6 +56,18 @@ namespace Racconotes.Tests
 
             Assert.IsTrue(ctx.TrackRepository.GetAllTracks().Any(),
                 "Свежая БД с seed:true должна содержать демо-треки.");
+        }
+
+        [Test]
+        public void Build_WithSeed_EverySeedTrackHasNotes()
+        {
+            // Регрессия фикса бага «не все треки запускаются»: раньше сид-трек 3 был без нот,
+            // и кнопка «Играть» для него молча не срабатывала (AppController отсеивает треки без нот).
+            GameContext ctx = GameContextFactory.Build(_conn);
+
+            foreach (MidiTrack track in ctx.TrackRepository.GetAllTracks())
+                Assert.IsNotEmpty(ctx.NoteRepository.GetNotesForTrack(track.TrackId).ToList(),
+                    $"У сид-трека {track.TrackId} «{track.Title}» должны быть ноты.");
         }
 
         [Test]

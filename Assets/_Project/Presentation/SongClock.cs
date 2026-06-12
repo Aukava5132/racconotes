@@ -34,5 +34,8 @@ namespace Racconotes.Presentation
         }
 
         public void Stop() => Running = false;
+
+        /// <summary>Возобновить отсчёт без сброса времени (в отличие от <see cref="Start"/>) — для паузы.</summary>
+        public void Resume() => Running = true;
     }
 }

@@ -73,12 +73,31 @@ namespace Racconotes.Application.Engine
         /// </summary>
         public IReadOnlyList<Note> BeginPlaying()
         {
+            EnsureSelecting();
+            State = GameSessionState.Loading;
+            return StartEngine(_noteRepo.GetNotesForTrack(SelectedTrackId.Value).ToList());
+        }
+
+        /// <summary>
+        /// Как <see cref="BeginPlaying()"/>, но ноты грузятся с применённой пользовательской
+        /// аппликатурой (§2.3): рука/палец берутся из UserFingerAssignments (COALESCE поверх Notes).
+        /// Судейство аппликатуру не использует — влияет только на отображение/анализ.
+        /// </summary>
+        public IReadOnlyList<Note> BeginPlaying(int userId)
+        {
+            EnsureSelecting();
+            State = GameSessionState.Loading;
+            return StartEngine(_noteRepo.GetNotesForTrack(SelectedTrackId.Value, userId).ToList());
+        }
+
+        private void EnsureSelecting()
+        {
             if (State != GameSessionState.Selecting || SelectedTrackId == null)
                 throw new InvalidOperationException("Сначала выберите трек через SelectTrack.");
+        }
 
-            State = GameSessionState.Loading;
-            List<Note> notes = _noteRepo.GetNotesForTrack(SelectedTrackId.Value).ToList();
-
+        private IReadOnlyList<Note> StartEngine(List<Note> notes)
+        {
             _engine.Begin(notes); // внутри Loading → Playing
             State = GameSessionState.Playing;
             return notes;
@@ -96,6 +115,44 @@ namespace Racconotes.Application.Engine
                 throw new InvalidOperationException("PushInput допустим только во время игры (после BeginPlaying).");
 
             return _engine.OnInput(input);
+        }
+
+        /// <summary>
+        /// Подать отпускание клавиши (для длинных нот-удержаний). Проксирует
+        /// <see cref="GameEngine.OnRelease"/>: возвращает финализированный <see cref="HitEvent"/>
+        /// удержания (оценка головы либо Miss при раннем отпускании) либо null, если активного
+        /// удержания этой высоты нет.
+        /// </summary>
+        public HitEvent PushRelease(int midiNumber, double timeMs)
+        {
+            if (State != GameSessionState.Playing)
+                throw new InvalidOperationException("PushRelease допустим только во время игры (после BeginPlaying).");
+
+            return _engine.OnRelease(midiNumber, timeMs);
+        }
+
+        /// <summary>
+        /// Продвинуть активные удержания во времени: те, что доведены до конца (хвост прошёл линию),
+        /// финализируются как успех. Проксирует <see cref="GameEngine.TickHolds"/>. Вызывается каждый
+        /// кадр со временем песни в мс.
+        /// </summary>
+        public IReadOnlyList<HitEvent> TickHolds(double nowMs)
+        {
+            if (State != GameSessionState.Playing)
+                throw new InvalidOperationException("TickHolds допустим только во время игры (после BeginPlaying).");
+
+            return _engine.TickHolds(nowMs);
+        }
+
+        /// <summary>
+        /// Прервать активную realtime-сессию без сохранения результата (выход в меню из паузы):
+        /// сбросить FSM в Idle. Идемпотентно — вне Playing ничего не делает.
+        /// </summary>
+        public void AbortPlaying()
+        {
+            if (State != GameSessionState.Playing) return;
+            State = GameSessionState.Idle;
+            SelectedTrackId = null;
         }
 
         /// <summary>

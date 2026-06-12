@@ -11,6 +11,13 @@ namespace Racconotes.Domain.Repositories
     public interface INoteRepository
     {
         IEnumerable<Note> GetNotesForTrack(int trackId);
+
+        /// <summary>
+        /// Ноты трека с применённой пользовательской аппликатурой (§2.3): рука/палец берутся из
+        /// UserFingerAssignments при наличии переопределения, иначе из Notes (COALESCE).
+        /// </summary>
+        IEnumerable<Note> GetNotesForTrack(int trackId, int userId);
+
         Note GetNoteById(int noteId);
         void AddNote(Note note);
         void BulkInsertNotes(IEnumerable<Note> notes);            // для импорта MIDI

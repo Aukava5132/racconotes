@@ -17,7 +17,8 @@ namespace Racconotes.Infrastructure.Repositories
             @"SELECT user_id AS UserId, visual_offset_ms AS VisualOffsetMs, audio_offset_ms AS AudioOffsetMs,
                      min_bpm_filter AS MinBpmFilter, max_bpm_filter AS MaxBpmFilter, preferred_hand AS PreferredHand,
                      difficulty_filter_min AS DifficultyFilterMin, difficulty_filter_max AS DifficultyFilterMax,
-                     key_label_mode AS KeyLabelMode, note_label_mode AS NoteLabelMode
+                     key_label_mode AS KeyLabelMode, note_label_mode AS NoteLabelMode,
+                     master_volume AS MasterVolume
               FROM UserSettings";
 
         private readonly SQLiteConnection _conn;
@@ -39,20 +40,20 @@ namespace Racconotes.Infrastructure.Repositories
                 @"UPDATE UserSettings SET
                     visual_offset_ms = ?, audio_offset_ms = ?, min_bpm_filter = ?, max_bpm_filter = ?,
                     preferred_hand = ?, difficulty_filter_min = ?, difficulty_filter_max = ?,
-                    key_label_mode = ?, note_label_mode = ?
+                    key_label_mode = ?, note_label_mode = ?, master_volume = ?
                   WHERE user_id = ?;",
                 s.VisualOffsetMs, s.AudioOffsetMs, s.MinBpmFilter, s.MaxBpmFilter,
                 s.PreferredHand, s.DifficultyFilterMin, s.DifficultyFilterMax,
-                keyMode, noteMode, s.UserId);
+                keyMode, noteMode, s.MasterVolume, s.UserId);
 
             if (updated == 0)
                 _conn.Execute(
                     @"INSERT INTO UserSettings
                         (user_id, visual_offset_ms, audio_offset_ms, min_bpm_filter, max_bpm_filter,
-                         preferred_hand, difficulty_filter_min, difficulty_filter_max, key_label_mode, note_label_mode)
-                      VALUES (?,?,?,?,?,?,?,?,?,?);",
+                         preferred_hand, difficulty_filter_min, difficulty_filter_max, key_label_mode, note_label_mode, master_volume)
+                      VALUES (?,?,?,?,?,?,?,?,?,?,?);",
                     s.UserId, s.VisualOffsetMs, s.AudioOffsetMs, s.MinBpmFilter, s.MaxBpmFilter,
-                    s.PreferredHand, s.DifficultyFilterMin, s.DifficultyFilterMax, keyMode, noteMode);
+                    s.PreferredHand, s.DifficultyFilterMin, s.DifficultyFilterMax, keyMode, noteMode, s.MasterVolume);
         }
     }
 }

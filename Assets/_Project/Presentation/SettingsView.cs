@@ -31,6 +31,7 @@ namespace Racconotes.Presentation
 
         private LabelMode _keyMode = LabelMode.Off;
         private LabelMode _noteMode = LabelMode.Off;
+        private float _masterVolume = 1f;
 
         private List<MidiTrack> _tracks = new List<MidiTrack>();
         private List<string> _importFiles = new List<string>();
@@ -76,6 +77,7 @@ namespace Racconotes.Presentation
             UserSettings s = _ctx.UserSettingsRepository.GetSettings(_userId);
             _keyMode = LabelModeCodec.FromDbString(s?.KeyLabelMode);
             _noteMode = LabelModeCodec.FromDbString(s?.NoteLabelMode);
+            _masterVolume = Mathf.Clamp01((float)(s?.MasterVolume ?? 1.0));
         }
 
         private void SaveSettings()
@@ -83,6 +85,7 @@ namespace Racconotes.Presentation
             UserSettings s = _ctx.UserSettingsRepository.GetSettings(_userId) ?? new UserSettings { UserId = _userId };
             s.KeyLabelMode = LabelModeCodec.ToDbString(_keyMode);
             s.NoteLabelMode = LabelModeCodec.ToDbString(_noteMode);
+            s.MasterVolume = _masterVolume;
             _ctx.UserSettingsRepository.SaveSettings(s);
         }
 
@@ -181,6 +184,7 @@ namespace Racconotes.Presentation
 
             _scroll = GUILayout.BeginScrollView(_scroll);
             DrawLabelsSection();
+            DrawSoundSection();
             DrawLibrarySection();
             DrawImportSection();
             GUILayout.EndScrollView();
@@ -210,6 +214,24 @@ namespace Racconotes.Presentation
 
             GUILayout.Label("На белых клавишах текст чёрный, на чёрных — белый. " +
                             "«Кнопки» подписывает только ноты в пределах двух октав раскладки.", _hint);
+            GUILayout.Space(14f);
+        }
+
+        private void DrawSoundSection()
+        {
+            GUILayout.Label("Звук", _section);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Громкость:", _row, GUILayout.Width(170f));
+            float v = GUILayout.HorizontalSlider(_masterVolume, 0f, 1f, GUILayout.Width(320f), GUILayout.Height(24f));
+            GUILayout.Space(12f);
+            GUILayout.Label($"{Mathf.RoundToInt(_masterVolume * 100f)}%", _sub, GUILayout.Width(60f));
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+            if (Mathf.Abs(v - _masterVolume) > 0.001f)
+            {
+                _masterVolume = v;
+                SaveSettings();
+            }
             GUILayout.Space(14f);
         }
 
