@@ -88,6 +88,8 @@ namespace Racconotes.Infrastructure.Database
                 preferred_hand        TEXT DEFAULT 'auto',
                 difficulty_filter_min REAL DEFAULT 1,
                 difficulty_filter_max REAL DEFAULT 10,
+                key_label_mode        TEXT DEFAULT 'off',
+                note_label_mode       TEXT DEFAULT 'off',
                 FOREIGN KEY (user_id) REFERENCES Users(user_id)
             );",
 

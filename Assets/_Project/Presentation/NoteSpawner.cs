@@ -26,6 +26,9 @@ namespace Racconotes.Presentation
 
         public int LiveCount => _live.Count;
 
+        /// <summary>Живые вью нот на экране (для наложения текстовых подписей в <see cref="LabelOverlay"/>).</summary>
+        public IEnumerable<NoteView> LiveViews => _live.Values;
+
         public void Init(IReadOnlyList<Note> notes, PianoLayout layout, float fallSpeed,
             float hitLineY, float spawnLeadSeconds, float missWindowSeconds)
         {
