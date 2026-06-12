@@ -26,6 +26,9 @@ namespace Racconotes.Application
         /// <summary>Настройки пользователя (режимы подписи и т.д.) — таблица UserSettings как активный компонент.</summary>
         public IUserSettingsRepository UserSettingsRepository { get; }
 
+        /// <summary>Пользовательская аппликатура (§2.3) — переопределения руки/пальца в UserFingerAssignments.</summary>
+        public IUserFingerAssignmentRepository FingerAssignments { get; }
+
         /// <summary>Главный оркестратор игровой сессии (FSM §1.3) для Presentation.</summary>
         public SessionController Session { get; }
 
@@ -41,6 +44,7 @@ namespace Racconotes.Application
             IResultRepository resultRepository,
             IStatsQueries statsQueries,
             IUserSettingsRepository userSettingsRepository,
+            IUserFingerAssignmentRepository fingerAssignments,
             SessionController session,
             MidiImportService midiImport,
             StatsAnalyzer statsAnalyzer)
@@ -50,6 +54,7 @@ namespace Racconotes.Application
             ResultRepository = resultRepository ?? throw new ArgumentNullException(nameof(resultRepository));
             StatsQueries = statsQueries ?? throw new ArgumentNullException(nameof(statsQueries));
             UserSettingsRepository = userSettingsRepository ?? throw new ArgumentNullException(nameof(userSettingsRepository));
+            FingerAssignments = fingerAssignments ?? throw new ArgumentNullException(nameof(fingerAssignments));
             Session = session ?? throw new ArgumentNullException(nameof(session));
             MidiImport = midiImport ?? throw new ArgumentNullException(nameof(midiImport));
             StatsAnalyzer = statsAnalyzer ?? throw new ArgumentNullException(nameof(statsAnalyzer));

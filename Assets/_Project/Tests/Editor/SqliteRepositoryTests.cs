@@ -21,6 +21,7 @@ namespace Racconotes.Tests
         private SqliteTrackRepository _trackRepo;
         private SqliteResultRepository _resultRepo;
         private SqliteUserSettingsRepository _settingsRepo;
+        private SqliteUserFingerAssignmentRepository _fingerRepo;
 
         [SetUp]
         public void SetUp()
@@ -36,6 +37,7 @@ namespace Racconotes.Tests
             _trackRepo = new SqliteTrackRepository(_conn);
             _resultRepo = new SqliteResultRepository(_conn);
             _settingsRepo = new SqliteUserSettingsRepository(_conn);
+            _fingerRepo = new SqliteUserFingerAssignmentRepository(_conn);
         }
 
         [TearDown]
@@ -110,6 +112,60 @@ namespace Racconotes.Tests
             Note loaded = _noteRepo.GetNoteById(note.NoteId);
             Assert.AreEqual(5, loaded.Finger);
             Assert.AreEqual("left", loaded.Hand);
+        }
+
+        // ----- IUserFingerAssignmentRepository (§2.3) -----
+
+        [Test]
+        public void GetNotesForTrack_WithUser_AppliesOverride_OverAuto()
+        {
+            var note = NewNote(64, 1.0, hand: "right", finger: 3);
+            _noteRepo.AddNote(note);
+
+            _fingerRepo.Upsert(new UserFingerAssignment
+            {
+                UserId = 1, TrackId = 1, NoteId = note.NoteId, AssignedHand = "left", AssignedFinger = 2
+            });
+
+            // С userId — COALESCE отдаёт переопределение; без него — исходные значения Notes.
+            Note effective = _noteRepo.GetNotesForTrack(1, 1).Single();
+            Assert.AreEqual(2, effective.Finger);
+            Assert.AreEqual("left", effective.Hand);
+
+            Note auto = _noteRepo.GetNotesForTrack(1).Single();
+            Assert.AreEqual(3, auto.Finger);
+            Assert.AreEqual("right", auto.Hand);
+        }
+
+        [Test]
+        public void Upsert_UpdatesExisting_WithoutDuplicating()
+        {
+            var note = NewNote(64, 1.0);
+            _noteRepo.AddNote(note);
+
+            _fingerRepo.Upsert(new UserFingerAssignment { UserId = 1, TrackId = 1, NoteId = note.NoteId, AssignedHand = "right", AssignedFinger = 1 });
+            _fingerRepo.Upsert(new UserFingerAssignment { UserId = 1, TrackId = 1, NoteId = note.NoteId, AssignedHand = "left", AssignedFinger = 4 });
+
+            Assert.AreEqual(1, _conn.ExecuteScalar<int>(
+                "SELECT COUNT(*) FROM UserFingerAssignments WHERE user_id = 1 AND track_id = 1 AND note_id = ?;", note.NoteId));
+            UserFingerAssignment a = _fingerRepo.GetForTrack(1, 1).Single();
+            Assert.AreEqual(4, a.AssignedFinger);
+            Assert.AreEqual("left", a.AssignedHand);
+        }
+
+        [Test]
+        public void Reset_RemovesOverride_RevertsToAuto()
+        {
+            var note = NewNote(64, 1.0, hand: "right", finger: 3);
+            _noteRepo.AddNote(note);
+            _fingerRepo.Upsert(new UserFingerAssignment { UserId = 1, TrackId = 1, NoteId = note.NoteId, AssignedHand = "left", AssignedFinger = 2 });
+
+            _fingerRepo.Reset(1, 1, note.NoteId);
+
+            Assert.IsEmpty(_fingerRepo.GetForTrack(1, 1));
+            Note auto = _noteRepo.GetNotesForTrack(1, 1).Single();
+            Assert.AreEqual(3, auto.Finger);     // вернулось к Notes
+            Assert.AreEqual("right", auto.Hand);
         }
 
         // ----- ITrackRepository -----
@@ -309,6 +365,18 @@ namespace Racconotes.Tests
         }
 
         [Test]
+        public void SaveSettings_RoundTripsMasterVolume()
+        {
+            // Дефолт POCO = 1.0 при вставке без явного значения.
+            _settingsRepo.SaveSettings(new UserSettings { UserId = 1 });
+            Assert.AreEqual(1.0, _settingsRepo.GetSettings(1).MasterVolume, 1e-9);
+
+            // Явное значение сохраняется и читается.
+            _settingsRepo.SaveSettings(new UserSettings { UserId = 1, MasterVolume = 0.4 });
+            Assert.AreEqual(0.4, _settingsRepo.GetSettings(1).MasterVolume, 1e-9);
+        }
+
+        [Test]
         public void EnsureCreated_Migrates_OldDbWithoutLabelColumns()
         {
             // Имитируем старый notes.db: схема есть (SchemaVersion), но UserSettings без новых колонок.
@@ -331,6 +399,7 @@ namespace Racconotes.Tests
             Assert.IsNotNull(s);
             Assert.AreEqual("off", s.KeyLabelMode);
             Assert.AreEqual("off", s.NoteLabelMode);
+            Assert.AreEqual(1.0, s.MasterVolume, 1e-9); // колонка master_volume добавлена с DEFAULT 1
         }
     }
 }

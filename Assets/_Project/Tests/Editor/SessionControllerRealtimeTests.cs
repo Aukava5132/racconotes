@@ -170,6 +170,10 @@ namespace Racconotes.Tests
             public IEnumerable<Note> GetNotesForTrack(int trackId) =>
                 Notes.FindAll(n => n.TrackId == trackId);
 
+            // Фейк без переопределений аппликатуры — userId игнорируется.
+            public IEnumerable<Note> GetNotesForTrack(int trackId, int userId) =>
+                GetNotesForTrack(trackId);
+
             public Note GetNoteById(int noteId) => Notes.Find(n => n.NoteId == noteId);
             public void AddNote(Note note) => Notes.Add(note);
             public void BulkInsertNotes(IEnumerable<Note> notes) => Notes.AddRange(notes);

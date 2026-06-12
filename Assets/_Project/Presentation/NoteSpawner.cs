@@ -65,11 +65,14 @@ namespace Racconotes.Presentation
                 NoteView view = kv.Value;
                 view.SetSongTime(songTime);
 
-                double past = songTime - view.Model.StartTime;
-                if (!view.Consumed && past > _missWindowSeconds)
+                // Промах головы (ноту не нажали в окне) — по StartTime; удерживаемую не трогаем.
+                double pastHead = songTime - view.Model.StartTime;
+                if (!view.Consumed && !view.Holding && pastHead > _missWindowSeconds)
                     view.MarkJudged(Judgement.Miss);
 
-                if (past > _missWindowSeconds + CullAfterSeconds)
+                // Отбраковка — по концу ноты (StartTime + Duration), чтобы холд жил до хвоста.
+                double pastEnd = songTime - (view.Model.StartTime + view.Model.Duration);
+                if (pastEnd > _missWindowSeconds + CullAfterSeconds)
                     (done ??= new List<int>()).Add(kv.Key);
             }
 
@@ -86,6 +89,13 @@ namespace Racconotes.Presentation
         {
             if (_live.TryGetValue(noteId, out NoteView view))
                 view.MarkJudged(judgement);
+        }
+
+        /// <summary>Отметить начало удержания длинной ноты (голова нажата) — визуал «зажато».</summary>
+        public void OnHoldStart(int noteId)
+        {
+            if (_live.TryGetValue(noteId, out NoteView view))
+                view.MarkHolding();
         }
     }
 }

@@ -39,5 +39,21 @@ namespace Racconotes.Presentation
                     buffer.Add(new InputEvent(_clock.Milliseconds, midi.Value, 0));
             }
         }
+
+        /// <summary>Дописать в буфер MIDI-номера клавиш, отпущенных в этом кадре (для удержаний).</summary>
+        public void CollectReleases(List<int> buffer)
+        {
+            Keyboard kb = Keyboard.current;
+            if (kb == null || _keys == null) return;
+
+            foreach (Key key in _keys)
+            {
+                if (!kb[key].wasReleasedThisFrame) continue;
+
+                int? midi = PianoKeyMap.MidiFor(key, _baseMidi);
+                if (midi.HasValue)
+                    buffer.Add(midi.Value);
+            }
+        }
     }
 }

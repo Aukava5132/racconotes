@@ -16,5 +16,6 @@ namespace Racconotes.Domain.Entities
         public double DifficultyFilterMax { get; set; }
         public string KeyLabelMode { get; set; }       // режим подписи клавиш: off/key/note/solfege
         public string NoteLabelMode { get; set; }      // режим подписи летящих нот: off/key/note/solfege
+        public double MasterVolume { get; set; } = 1.0; // громкость звука 0..1
     }
 }

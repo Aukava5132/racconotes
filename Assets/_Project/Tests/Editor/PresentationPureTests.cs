@@ -279,5 +279,36 @@ namespace Racconotes.Tests
             Assert.AreEqual(LabelMode.Off, LabelModeCodec.FromDbString(null));
             Assert.AreEqual(LabelMode.Off, LabelModeCodec.FromDbString("xxx"));
         }
+
+        // --- ToneSynth (процедурный звук) ---
+
+        [Test]
+        public void ToneSynth_Frequency_EqualTemperament()
+        {
+            Assert.AreEqual(440.0, ToneSynth.Frequency(69), 1e-6); // A4
+            Assert.AreEqual(880.0, ToneSynth.Frequency(81), 1e-6); // A5 (+октава)
+            Assert.AreEqual(220.0, ToneSynth.Frequency(57), 1e-6); // A3 (−октава)
+        }
+
+        [Test]
+        public void ToneSynth_Render_LengthAndRange()
+        {
+            float[] data = ToneSynth.Render(60, 44100, 0.5f);
+
+            Assert.AreEqual(22050, data.Length);                            // sampleRate × seconds
+            Assert.IsTrue(data.All(s => s >= -1f && s <= 1f));              // без клиппинга
+            Assert.IsTrue(data.Take(2000).Any(s => Mathf.Abs(s) > 0.01f));  // звук, а не тишина
+        }
+
+        [Test]
+        public void ToneSynth_Render_EnvelopeDecays()
+        {
+            float[] data = ToneSynth.Render(60, 44100, 0.7f);
+            float early = 0f, late = 0f;
+            for (int i = 0; i < 2000; i++) early = Mathf.Max(early, Mathf.Abs(data[i]));
+            for (int i = data.Length - 2000; i < data.Length; i++) late = Mathf.Max(late, Mathf.Abs(data[i]));
+
+            Assert.Less(late, early); // экспоненциальное затухание: конец тише начала
+        }
     }
 }

@@ -54,6 +54,7 @@ namespace Racconotes.Infrastructure.Database
         {
             EnsureColumn(conn, "UserSettings", "key_label_mode", "TEXT DEFAULT 'off'");
             EnsureColumn(conn, "UserSettings", "note_label_mode", "TEXT DEFAULT 'off'");
+            EnsureColumn(conn, "UserSettings", "master_volume", "REAL DEFAULT 1");
         }
 
         private static void EnsureColumn(SQLiteConnection conn, string table, string column, string definition)

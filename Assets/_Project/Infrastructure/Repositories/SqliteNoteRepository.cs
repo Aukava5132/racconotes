@@ -30,6 +30,20 @@ namespace Racconotes.Infrastructure.Repositories
         public IEnumerable<Note> GetNotesForTrack(int trackId) =>
             _conn.Query<Note>(Select + " WHERE track_id = ? ORDER BY start_time;", trackId);
 
+        // §2.3: рука/палец — переопределение пользователя, иначе значения из Notes (БД активна — COALESCE в SQL).
+        public IEnumerable<Note> GetNotesForTrack(int trackId, int userId) =>
+            _conn.Query<Note>(
+                @"SELECT n.note_id AS NoteId, n.track_id AS TrackId, n.note_index AS NoteIndex,
+                         n.midi_number AS MidiNumber, n.start_time AS StartTime, n.duration AS Duration,
+                         COALESCE(ufa.assigned_hand,   n.hand)   AS Hand,
+                         COALESCE(ufa.assigned_finger, n.finger) AS Finger
+                  FROM Notes n
+                  LEFT JOIN UserFingerAssignments ufa
+                         ON ufa.note_id = n.note_id AND ufa.user_id = ?
+                  WHERE n.track_id = ?
+                  ORDER BY n.start_time;",
+                userId, trackId);
+
         public Note GetNoteById(int noteId)
         {
             List<Note> rows = _conn.Query<Note>(Select + " WHERE note_id = ?;", noteId);

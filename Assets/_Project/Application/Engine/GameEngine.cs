@@ -27,6 +27,11 @@ namespace Racconotes.Application.Engine
         private double[] _expectedMs;  // ожидаемое время нажатия каждой ноты в мс
         private HitEvent[] _hits;      // назначенное нажатие на ноту; null = ещё не попали
 
+        // Активные удержания (длинные ноты): MIDI → (индекс ноты, время конца удержания в мс).
+        private readonly Dictionary<int, (int idx, double releaseMs)> _activeHolds =
+            new Dictionary<int, (int, double)>();
+        private readonly List<HitEvent> _resolvedHolds = new List<HitEvent>(); // буфер возврата TickHolds
+
         public GameSessionState State { get; private set; } = GameSessionState.Idle;
 
         public GameEngine(ScoreModel scoreModel = null, JudgementWindows windows = null)
@@ -58,6 +63,7 @@ namespace Racconotes.Application.Engine
             _notes = notes.OrderBy(n => n.StartTime).ThenBy(n => n.NoteIndex).ToList();
             _expectedMs = _notes.Select(n => n.StartTime * 1000.0).ToArray();
             _hits = new HitEvent[_notes.Count];
+            _activeHolds.Clear();
             State = GameSessionState.Playing;
         }
 
@@ -103,7 +109,62 @@ namespace Racconotes.Application.Engine
                 FingerUsed = input.FingerUsed
             };
             _hits[best] = hit;
+
+            // Длинная нота: зарегистрировать активное удержание до момента отпускания/завершения.
+            if (HoldRules.IsHold(_notes[best].Duration))
+                _activeHolds[input.MidiNumber] = (best, _expectedMs[best] + _notes[best].Duration * 1000.0);
+
             return hit;
+        }
+
+        /// <summary>
+        /// Отпускание клавиши для активного удержания (длинной ноты). Если отпустили заметно раньше
+        /// конца ноты (за пределами окна BadMs) — удержание сорвано: оценка ноты → Miss. Иначе
+        /// оценка головы сохраняется. Возвращает финализированный <see cref="HitEvent"/> либо null,
+        /// если активного удержания этой высоты нет (обычный тап или лишнее отпускание).
+        /// </summary>
+        public HitEvent OnRelease(int midiNumber, double timeMs)
+        {
+            if (State != GameSessionState.Playing)
+                throw new InvalidOperationException("OnRelease допустим только в состоянии Playing (после Begin).");
+
+            if (!_activeHolds.TryGetValue(midiNumber, out (int idx, double releaseMs) hold))
+                return null;
+
+            _activeHolds.Remove(midiNumber);
+
+            HitEvent hit = _hits[hold.idx];
+            if (timeMs < hold.releaseMs - _windows.BadMs)
+                hit.Judgement = Judgement.Miss; // отпустили слишком рано — удержание не засчитано
+
+            return hit;
+        }
+
+        /// <summary>
+        /// Продвинуть активные удержания во времени песни (мс): те, у которых хвост уже прошёл линию
+        /// (nowMs ≥ конец + BadMs) при всё ещё зажатой клавише — успешно завершить (оценка головы
+        /// сохраняется). Возвращает завершившиеся в этом тике удержания (общий переиспользуемый буфер).
+        /// </summary>
+        public IReadOnlyList<HitEvent> TickHolds(double nowMs)
+        {
+            if (State != GameSessionState.Playing)
+                throw new InvalidOperationException("TickHolds допустим только в состоянии Playing (после Begin).");
+
+            _resolvedHolds.Clear();
+            if (_activeHolds.Count == 0) return _resolvedHolds;
+
+            List<int> done = null;
+            foreach (KeyValuePair<int, (int idx, double releaseMs)> kv in _activeHolds)
+            {
+                if (nowMs < kv.Value.releaseMs + _windows.BadMs) continue;
+                _resolvedHolds.Add(_hits[kv.Value.idx]);
+                (done ??= new List<int>()).Add(kv.Key);
+            }
+
+            if (done != null)
+                foreach (int midi in done) _activeHolds.Remove(midi);
+
+            return _resolvedHolds;
         }
 
         /// <summary>
