@@ -104,3 +104,9 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Unity AI Assistant (локальный инструмент, не часть проекта)
+/[Aa]ssets/AssistantCustomInstructions.txt
+/[Aa]ssets/AssistantCustomInstructions.txt.meta
+/[Pp]roject[Ss]ettings/AI.Assistant/
+/[Pp]roject[Ss]ettings/Packages/com.unity.ai.assistant/
