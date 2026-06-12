@@ -12,8 +12,12 @@ namespace Racconotes.Presentation
     /// </summary>
     public sealed class AppController : MonoBehaviour
     {
+        private const int DefaultUserId = 1; // демо-пользователь (как в GameplayController)
+
         private GameContext _ctx;
         private TrackSelectView _menu;
+        private StatsView _stats;
+        private SettingsView _settings;
         private GameplayController _gameplay;
 
         private void Start()
@@ -27,7 +31,19 @@ namespace Racconotes.Presentation
 
             _ctx = GameServices.Context;
             _menu = gameObject.AddComponent<TrackSelectView>();
-            _menu.Init(_ctx.TrackRepository, OnTrackChosen);
+            _menu.Init(_ctx, DefaultUserId, OnTrackChosen, ShowStats, ShowSettings);
+
+            _stats = gameObject.AddComponent<StatsView>();
+            _stats.Init(_ctx, DefaultUserId);
+            _stats.Hide();
+            _stats.OnBack += BackFromStats;
+
+            _settings = gameObject.AddComponent<SettingsView>();
+            _settings.Init(_ctx, DefaultUserId);
+            _settings.Hide();
+            _settings.OnBack += BackFromSettings;
+            _settings.OnLibraryChanged += () => _menu.Refresh();
+
             ShowMenu();
         }
 
@@ -41,6 +57,30 @@ namespace Racconotes.Presentation
             }
 
             _menu.Show();
+        }
+
+        private void ShowStats()
+        {
+            _menu.Hide();
+            _stats.Show();
+        }
+
+        private void BackFromStats()
+        {
+            _stats.Hide();
+            ShowMenu();
+        }
+
+        private void ShowSettings()
+        {
+            _menu.Hide();
+            _settings.Show();
+        }
+
+        private void BackFromSettings()
+        {
+            _settings.Hide();
+            ShowMenu();
         }
 
         private void OnTrackChosen(int trackId)

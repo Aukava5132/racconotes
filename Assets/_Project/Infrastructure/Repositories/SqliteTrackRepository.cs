@@ -48,8 +48,23 @@ namespace Racconotes.Infrastructure.Repositories
                 track.Filename, track.Title, track.Composer, track.Bpm,
                 track.Tonality, track.Difficulty, track.NoteDensity, track.TrackId);
 
-        public void DeleteTrack(int id) =>
-            _conn.Execute("DELETE FROM MidiTracks WHERE track_id = ?;", id);
+        /// <summary>
+        /// Удаляет трек со всей зависимой историей. ON DELETE CASCADE в схеме есть только у Notes;
+        /// у GameResults/HitEvents/FingerMapping/UserFingerAssignments/TrackTransposition ссылки на
+        /// трек/ноты БЕЗ каскада, поэтому при наличии истории игр голый DELETE трека падал бы
+        /// «FOREIGN KEY constraint failed». Чистим зависимые строки в порядке, не нарушающем FK,
+        /// одной транзакцией; Notes удаляются каскадом при удалении трека.
+        /// </summary>
+        public void DeleteTrack(int id) => _conn.RunInTransaction(() =>
+        {
+            _conn.Execute("DELETE FROM HitEvents WHERE result_id IN (SELECT result_id FROM GameResults WHERE track_id = ?);", id);
+            _conn.Execute("DELETE FROM HitEvents WHERE note_id IN (SELECT note_id FROM Notes WHERE track_id = ?);", id);
+            _conn.Execute("DELETE FROM GameResults WHERE track_id = ?;", id);
+            _conn.Execute("DELETE FROM FingerMapping WHERE track_id = ?;", id);
+            _conn.Execute("DELETE FROM UserFingerAssignments WHERE track_id = ?;", id);
+            _conn.Execute("DELETE FROM TrackTransposition WHERE track_id = ?;", id);
+            _conn.Execute("DELETE FROM MidiTracks WHERE track_id = ?;", id); // Notes удалятся каскадом
+        });
 
         public IEnumerable<MidiTrack> FilterByDifficulty(float min, float max) =>
             _conn.Query<MidiTrack>(

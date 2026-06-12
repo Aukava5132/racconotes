@@ -23,6 +23,9 @@ namespace Racconotes.Application
         public IResultRepository ResultRepository { get; }
         public IStatsQueries StatsQueries { get; }
 
+        /// <summary>Настройки пользователя (режимы подписи и т.д.) — таблица UserSettings как активный компонент.</summary>
+        public IUserSettingsRepository UserSettingsRepository { get; }
+
         /// <summary>Главный оркестратор игровой сессии (FSM §1.3) для Presentation.</summary>
         public SessionController Session { get; }
 
@@ -37,6 +40,7 @@ namespace Racconotes.Application
             INoteRepository noteRepository,
             IResultRepository resultRepository,
             IStatsQueries statsQueries,
+            IUserSettingsRepository userSettingsRepository,
             SessionController session,
             MidiImportService midiImport,
             StatsAnalyzer statsAnalyzer)
@@ -45,6 +49,7 @@ namespace Racconotes.Application
             NoteRepository = noteRepository ?? throw new ArgumentNullException(nameof(noteRepository));
             ResultRepository = resultRepository ?? throw new ArgumentNullException(nameof(resultRepository));
             StatsQueries = statsQueries ?? throw new ArgumentNullException(nameof(statsQueries));
+            UserSettingsRepository = userSettingsRepository ?? throw new ArgumentNullException(nameof(userSettingsRepository));
             Session = session ?? throw new ArgumentNullException(nameof(session));
             MidiImport = midiImport ?? throw new ArgumentNullException(nameof(midiImport));
             StatsAnalyzer = statsAnalyzer ?? throw new ArgumentNullException(nameof(statsAnalyzer));

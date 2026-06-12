@@ -42,6 +42,7 @@ namespace Racconotes.Tests
             Assert.IsNotNull(ctx.NoteRepository);
             Assert.IsNotNull(ctx.ResultRepository);
             Assert.IsNotNull(ctx.StatsQueries);
+            Assert.IsNotNull(ctx.UserSettingsRepository);
             Assert.IsNotNull(ctx.Session);
             Assert.IsNotNull(ctx.MidiImport);
             Assert.IsNotNull(ctx.StatsAnalyzer);
