@@ -23,6 +23,29 @@ namespace Racconotes.Presentation
             { Key.Digit7, 22 }, { Key.U, 23 },
         };
 
+        // Человекочитаемые подписи кнопок (Key.Digit2.ToString() == "Digit2", нужно "2").
+        // Ключи синхронны с Semitones — обратная таблица «полутон → подпись» строится по ним.
+        private static readonly Dictionary<Key, string> Captions = new Dictionary<Key, string>
+        {
+            { Key.Z, "Z" }, { Key.S, "S" }, { Key.X, "X" }, { Key.D, "D" }, { Key.C, "C" },
+            { Key.V, "V" }, { Key.G, "G" }, { Key.B, "B" }, { Key.H, "H" }, { Key.N, "N" },
+            { Key.J, "J" }, { Key.M, "M" },
+            { Key.Q, "Q" }, { Key.Digit2, "2" }, { Key.W, "W" }, { Key.Digit3, "3" }, { Key.E, "E" },
+            { Key.R, "R" }, { Key.Digit5, "5" }, { Key.T, "T" }, { Key.Digit6, "6" }, { Key.Y, "Y" },
+            { Key.Digit7, "7" }, { Key.U, "U" },
+        };
+
+        // Обратная таблица «полутон → подпись кнопки» (полутон в Semitones уникален).
+        private static readonly Dictionary<int, string> SemitoneCaptions = BuildSemitoneCaptions();
+
+        private static Dictionary<int, string> BuildSemitoneCaptions()
+        {
+            var map = new Dictionary<int, string>();
+            foreach (var pair in Semitones)
+                map[pair.Value] = Captions[pair.Key];
+            return map;
+        }
+
         /// <summary>Все клавиши, задействованные под ноты (для опроса в Update).</summary>
         public static IEnumerable<Key> MappedKeys => Semitones.Keys;
 
@@ -32,5 +55,13 @@ namespace Racconotes.Presentation
         /// </summary>
         public static int? MidiFor(Key key, int baseMidi)
             => Semitones.TryGetValue(key, out int semis) ? baseMidi + semis : (int?)null;
+
+        /// <summary>
+        /// Подпись физической кнопки клавиатуры для ноты <paramref name="midi"/> при базовой C
+        /// диапазона (<paramref name="baseMidi"/> = <c>layout.LowMidi</c>): «Z», «S», … «2» … «U».
+        /// Пустая строка, если нота вне двух октав раскладки (физической кнопки нет).
+        /// </summary>
+        public static string KeyLabelFor(int midi, int baseMidi)
+            => SemitoneCaptions.TryGetValue(midi - baseMidi, out string caption) ? caption : "";
     }
 }

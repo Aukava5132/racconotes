@@ -14,5 +14,7 @@ namespace Racconotes.Domain.Entities
         public string PreferredHand { get; set; }      // left/right/auto
         public double DifficultyFilterMin { get; set; }
         public double DifficultyFilterMax { get; set; }
+        public string KeyLabelMode { get; set; }       // режим подписи клавиш: off/key/note/solfege
+        public string NoteLabelMode { get; set; }      // режим подписи летящих нот: off/key/note/solfege
     }
 }

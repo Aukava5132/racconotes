@@ -1,5 +1,6 @@
 using System.Linq;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using Racconotes.Domain.Entities;
 using Racconotes.Presentation;
@@ -191,6 +192,92 @@ namespace Racconotes.Tests
             var asc = TrackListing.Sort(tracks, TrackSortKey.Bpm, ascending: true);
 
             Assert.AreEqual(new[] { 2, 3, 1 }, asc.Select(t => t.TrackId).ToArray()); // Арпеджио, Блюз, Гамма
+        }
+
+        // --- NoteNaming (экран статистики: midi_number → имя ноты) ---
+
+        [Test]
+        public void NoteNaming_MapsMidiToScientificName()
+        {
+            Assert.AreEqual("C4", NoteNaming.Name(60));  // C4 = 60 по соглашению проекта
+            Assert.AreEqual("C#4", NoteNaming.Name(61)); // диез
+            Assert.AreEqual("E4", NoteNaming.Name(64));
+            Assert.AreEqual("A4", NoteNaming.Name(69));
+            Assert.AreEqual("B4", NoteNaming.Name(71));
+        }
+
+        [Test]
+        public void NoteNaming_HandlesOctaveBoundaries()
+        {
+            Assert.AreEqual("C5", NoteNaming.Name(72)); // следующая октава
+            Assert.AreEqual("B3", NoteNaming.Name(59)); // предыдущая октава
+        }
+
+        [Test]
+        public void NoteNaming_NameNoOctave_DropsOctaveNumber()
+        {
+            Assert.AreEqual("C", NoteNaming.NameNoOctave(60));
+            Assert.AreEqual("C#", NoteNaming.NameNoOctave(61));
+            Assert.AreEqual("B", NoteNaming.NameNoOctave(71));
+            Assert.AreEqual("C", NoteNaming.NameNoOctave(72)); // следующая октава, та же буква
+        }
+
+        [Test]
+        public void NoteNaming_Solfege_MapsToSyllables()
+        {
+            Assert.AreEqual("до", NoteNaming.Solfege(60));
+            Assert.AreEqual("до#", NoteNaming.Solfege(61));
+            Assert.AreEqual("ре", NoteNaming.Solfege(62));
+            Assert.AreEqual("си", NoteNaming.Solfege(71));
+        }
+
+        // --- Подписи клавиш/нот (KeyLabelFor, NoteLabels, LabelModeCodec) ---
+
+        [Test]
+        public void PianoKeyMap_KeyLabelFor_MapsMidiBackToButtonCaption()
+        {
+            Assert.AreEqual("Z", PianoKeyMap.KeyLabelFor(60, 60)); // C4 → нижний ряд
+            Assert.AreEqual("S", PianoKeyMap.KeyLabelFor(61, 60)); // C#4
+            Assert.AreEqual("Q", PianoKeyMap.KeyLabelFor(72, 60)); // C5 → верхний ряд (+12)
+            Assert.AreEqual("2", PianoKeyMap.KeyLabelFor(73, 60)); // C#5 → Digit2, подпись «2»
+            Assert.AreEqual("U", PianoKeyMap.KeyLabelFor(83, 60)); // B5 (+23) — край раскладки
+        }
+
+        [Test]
+        public void PianoKeyMap_KeyLabelFor_EmptyOutsideTwoOctaveLayout()
+        {
+            Assert.AreEqual("", PianoKeyMap.KeyLabelFor(59, 60)); // ниже base (semis = -1)
+            Assert.AreEqual("", PianoKeyMap.KeyLabelFor(84, 60)); // выше двух октав (semis = 24)
+        }
+
+        [Test]
+        public void NoteLabels_Format_RespectsEachMode()
+        {
+            Assert.AreEqual("", NoteLabels.Format(61, 60, LabelMode.Off));
+            Assert.AreEqual("S", NoteLabels.Format(61, 60, LabelMode.KeyboardKey));
+            Assert.AreEqual("C#", NoteLabels.Format(61, 60, LabelMode.NoteName));
+            Assert.AreEqual("до#", NoteLabels.Format(61, 60, LabelMode.Solfege));
+        }
+
+        [Test]
+        public void NoteLabels_LabelColor_BlackTextOnWhiteKey_WhiteTextOnBlackKey()
+        {
+            Assert.AreEqual(Color.black, NoteLabels.LabelColor(60)); // C — белая клавиша
+            Assert.AreEqual(Color.white, NoteLabels.LabelColor(61)); // C# — чёрная клавиша
+        }
+
+        [Test]
+        public void LabelModeCodec_RoundTripsThroughDbString()
+        {
+            foreach (LabelMode mode in System.Enum.GetValues(typeof(LabelMode)))
+                Assert.AreEqual(mode, LabelModeCodec.FromDbString(LabelModeCodec.ToDbString(mode)));
+        }
+
+        [Test]
+        public void LabelModeCodec_FromDbString_NullOrUnknown_IsOff()
+        {
+            Assert.AreEqual(LabelMode.Off, LabelModeCodec.FromDbString(null));
+            Assert.AreEqual(LabelMode.Off, LabelModeCodec.FromDbString("xxx"));
         }
     }
 }

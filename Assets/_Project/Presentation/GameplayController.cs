@@ -35,6 +35,7 @@ namespace Racconotes.Presentation
         private NoteSpawner _spawner;
         private KeyboardInputSource _input;
         private PianoKeyboardView _keyboard;
+        private LabelOverlay _overlay;
         private HudView _hud;
         private ResultScreenView _results;
         private ScoreAggregator _aggregator;
@@ -92,6 +93,22 @@ namespace Racconotes.Presentation
 
             _input = gameObject.AddComponent<KeyboardInputSource>();
             _input.Init(layout.LowMidi, _clock);
+
+            // Подписи клавиш/нот по настройкам пользователя (baseMidi = layout.LowMidi, как у ввода).
+            // Сбой чтения настроек не должен ронять сессию — иначе часы не стартуют и геймплей зависнет.
+            LabelMode keyMode = LabelMode.Off, noteMode = LabelMode.Off;
+            try
+            {
+                UserSettings settings = _ctx.UserSettingsRepository.GetSettings(DefaultUserId);
+                keyMode = LabelModeCodec.FromDbString(settings?.KeyLabelMode);
+                noteMode = LabelModeCodec.FromDbString(settings?.NoteLabelMode);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Racconotes] Не удалось прочитать настройки подписей: {e.Message}");
+            }
+            _overlay = gameObject.AddComponent<LabelOverlay>();
+            _overlay.Init(layout, layout.LowMidi, HitLineY, _spawner, keyMode, noteMode);
 
             _hud = gameObject.AddComponent<HudView>();
             _results = gameObject.AddComponent<ResultScreenView>();
@@ -173,6 +190,7 @@ namespace Racconotes.Presentation
         {
             if (_keyboard != null) Destroy(_keyboard.gameObject);
             if (_spawner != null) Destroy(_spawner.gameObject);
+            if (_overlay != null) Destroy(_overlay);
             if (_input != null) Destroy(_input);
             if (_hud != null) Destroy(_hud);
             if (_results != null) Destroy(_results);
