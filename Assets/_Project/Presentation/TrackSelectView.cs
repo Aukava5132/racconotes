@@ -37,6 +37,7 @@ namespace Racconotes.Presentation
         private Action<int> _onChosen;
         private Action _onShowStats;
         private Action _onShowSettings;
+        private Action _onShowFingerEditor;
 
         private int _minBpm = BpmLo, _maxBpm = BpmHi;
         private float _minDiff = DiffLo, _maxDiff = DiffHi;
@@ -57,13 +58,15 @@ namespace Racconotes.Presentation
 
         public bool Visible { get; private set; }
 
-        public void Init(GameContext ctx, int userId, Action<int> onChosen, Action onShowStats, Action onShowSettings)
+        public void Init(GameContext ctx, int userId, Action<int> onChosen, Action onShowStats,
+            Action onShowSettings, Action onShowFingerEditor)
         {
             _ctx = ctx ?? throw new ArgumentNullException(nameof(ctx));
             _userId = userId;
             _onChosen = onChosen ?? throw new ArgumentNullException(nameof(onChosen));
             _onShowStats = onShowStats ?? throw new ArgumentNullException(nameof(onShowStats));
             _onShowSettings = onShowSettings ?? throw new ArgumentNullException(nameof(onShowSettings));
+            _onShowFingerEditor = onShowFingerEditor ?? throw new ArgumentNullException(nameof(onShowFingerEditor));
             Refresh();
         }
 
@@ -290,6 +293,8 @@ namespace Racconotes.Presentation
             _minDiff = FloatStepper($"Сложн. от {_minDiff:0}", _minDiff, DiffStep, DiffLo, _maxDiff, ref changed);
             _maxDiff = FloatStepper($"Сложн. до {_maxDiff:0}", _maxDiff, DiffStep, _minDiff, DiffHi, ref changed);
             GUILayout.FlexibleSpace();
+            if (GUILayout.Button("✋ Аппликатура", GUILayout.Width(150f)))
+                _onShowFingerEditor?.Invoke();
             if (GUILayout.Button("⚙ Настройки", GUILayout.Width(130f)))
                 _onShowSettings?.Invoke();
             if (GUILayout.Button("Сбросить фильтр", GUILayout.Width(150f)))

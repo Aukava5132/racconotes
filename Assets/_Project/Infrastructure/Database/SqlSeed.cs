@@ -49,6 +49,25 @@ namespace Racconotes.Infrastructure.Database
               VALUES (9, 2, 2, 56, 2.0, 1.0, 'left', 1);",
             @"INSERT INTO Notes (note_id, track_id, note_index, midi_number, start_time, duration, hand, finger)
               VALUES (10, 2, 3, 49, 3.0, 1.0, 'left', 5);",
+
+            // Ноты трека 3 «Инвенция №1» (правая рука, мотив C-D-E-F-D-E-C-G) — note_id 11..18.
+            // Раньше трек 3 был без нот, и кнопка «Играть» для него молча не срабатывала.
+            @"INSERT INTO Notes (note_id, track_id, note_index, midi_number, start_time, duration, hand, finger)
+              VALUES (11, 3, 0, 60, 0.0, 0.5, 'right', 1);",
+            @"INSERT INTO Notes (note_id, track_id, note_index, midi_number, start_time, duration, hand, finger)
+              VALUES (12, 3, 1, 62, 0.5, 0.5, 'right', 2);",
+            @"INSERT INTO Notes (note_id, track_id, note_index, midi_number, start_time, duration, hand, finger)
+              VALUES (13, 3, 2, 64, 1.0, 0.5, 'right', 3);",
+            @"INSERT INTO Notes (note_id, track_id, note_index, midi_number, start_time, duration, hand, finger)
+              VALUES (14, 3, 3, 65, 1.5, 0.5, 'right', 4);",
+            @"INSERT INTO Notes (note_id, track_id, note_index, midi_number, start_time, duration, hand, finger)
+              VALUES (15, 3, 4, 62, 2.0, 0.5, 'right', 2);",
+            @"INSERT INTO Notes (note_id, track_id, note_index, midi_number, start_time, duration, hand, finger)
+              VALUES (16, 3, 5, 64, 2.5, 0.5, 'right', 3);",
+            @"INSERT INTO Notes (note_id, track_id, note_index, midi_number, start_time, duration, hand, finger)
+              VALUES (17, 3, 6, 60, 3.0, 0.5, 'right', 1);",
+            @"INSERT INTO Notes (note_id, track_id, note_index, midi_number, start_time, duration, hand, finger)
+              VALUES (18, 3, 7, 67, 3.5, 0.5, 'right', 5);",
         };
     }
 }

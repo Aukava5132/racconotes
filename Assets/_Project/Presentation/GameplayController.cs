@@ -35,15 +35,22 @@ namespace Racconotes.Presentation
         private NoteSpawner _spawner;
         private KeyboardInputSource _input;
         private PianoKeyboardView _keyboard;
+        private PianoSynth _synth;
         private LabelOverlay _overlay;
         private HudView _hud;
         private ResultScreenView _results;
         private ScoreAggregator _aggregator;
 
+        private PauseMenuView _pause;
+
         private readonly List<InputEvent> _pressBuffer = new List<InputEvent>();
+        private readonly List<int> _releaseBuffer = new List<int>();
+        private readonly Dictionary<int, Note> _notesById = new Dictionary<int, Note>();
         private double _endTime;
         private double _missWindowSeconds;
         private bool _finished;
+        private bool _paused;
+        private float _masterVolume = 1f;
 
         /// <summary>
         /// Запустить сессию для конкретного трека (его выбрал игрок в меню). Берёт контекст БД из
@@ -66,7 +73,8 @@ namespace Racconotes.Presentation
         private void StartSession(int trackId)
         {
             _ctx.Session.SelectTrack(trackId);
-            IReadOnlyList<Note> notes = _ctx.Session.BeginPlaying();
+            // BeginPlaying(userId): ноты грузятся с пользовательской аппликатурой (§2.3, COALESCE).
+            IReadOnlyList<Note> notes = _ctx.Session.BeginPlaying(DefaultUserId);
 
             if (notes.Count == 0)
             {
@@ -75,6 +83,11 @@ namespace Racconotes.Presentation
                 OnExitToMenu?.Invoke();
                 return;
             }
+
+            // Карта NoteId → Note: на стороне Presentation решаем «тап/удержание» (HoldRules),
+            // не «грязня» Domain-сущность HitEvent.
+            _notesById.Clear();
+            foreach (Note n in notes) _notesById[n.NoteId] = n;
 
             var pitches = notes.Select(n => n.MidiNumber).ToList();
             var layout = new PianoLayout(pitches, WhiteWidth);
@@ -94,6 +107,10 @@ namespace Racconotes.Presentation
             _input = gameObject.AddComponent<KeyboardInputSource>();
             _input.Init(layout.LowMidi, _clock);
 
+            // Озвучка нот процедурным синтезом под диапазон клавиатуры (без ассетов).
+            _synth = gameObject.AddComponent<PianoSynth>();
+            _synth.Init(layout.LowMidi, layout.HighMidi);
+
             // Подписи клавиш/нот по настройкам пользователя (baseMidi = layout.LowMidi, как у ввода).
             // Сбой чтения настроек не должен ронять сессию — иначе часы не стартуют и геймплей зависнет.
             LabelMode keyMode = LabelMode.Off, noteMode = LabelMode.Off;
@@ -102,16 +119,25 @@ namespace Racconotes.Presentation
                 UserSettings settings = _ctx.UserSettingsRepository.GetSettings(DefaultUserId);
                 keyMode = LabelModeCodec.FromDbString(settings?.KeyLabelMode);
                 noteMode = LabelModeCodec.FromDbString(settings?.NoteLabelMode);
+                _masterVolume = Mathf.Clamp01((float)(settings?.MasterVolume ?? 1.0));
             }
             catch (Exception e)
             {
                 Debug.LogWarning($"[Racconotes] Не удалось прочитать настройки подписей: {e.Message}");
             }
+            _synth.SetVolume(_masterVolume);
+
             _overlay = gameObject.AddComponent<LabelOverlay>();
             _overlay.Init(layout, layout.LowMidi, HitLineY, _spawner, keyMode, noteMode);
 
             _hud = gameObject.AddComponent<HudView>();
             _results = gameObject.AddComponent<ResultScreenView>();
+
+            _pause = gameObject.AddComponent<PauseMenuView>();
+            _pause.Init(_masterVolume);
+            _pause.OnResume += ResumeFromPause;
+            _pause.OnExitToMenu += ExitToMenu;
+            _pause.OnVolumeChanged += ApplyAndSaveVolume;
 
             _aggregator = new ScoreAggregator();
 
@@ -121,6 +147,7 @@ namespace Racconotes.Presentation
             _endTime += _missWindowSeconds + 0.6;
 
             _finished = false;
+            _paused = false;
             _clock.Start();
 
             Debug.Log($"[Racconotes] Старт сессии: трек {trackId}, нот {notes.Count}, диапазон клавиатуры MIDI {layout.LowMidi}..{layout.HighMidi}.");
@@ -148,6 +175,11 @@ namespace Racconotes.Presentation
                 return;
             }
 
+            if (Keyboard.current != null && Keyboard.current[Key.Escape].wasPressedThisFrame)
+                TogglePause();
+
+            if (_paused) return; // на паузе часы стоят, ввод не принимаем; меню рисует PauseMenuView
+
             _clock.Tick(Time.deltaTime);
             double songTime = _clock.Seconds;
 
@@ -158,19 +190,88 @@ namespace Racconotes.Presentation
             foreach (InputEvent ev in _pressBuffer)
             {
                 _keyboard.FlashPress(ev.MidiNumber);
+                _synth.Play(ev.MidiNumber); // звук на любое нажатие клавиши, как у инструмента
 
                 HitEvent hit = _ctx.Session.PushInput(ev);
-                if (hit != null)
+                if (hit == null) continue;
+
+                if (_notesById.TryGetValue(hit.NoteId, out Note n) && HoldRules.IsHold(n.Duration))
                 {
-                    _aggregator.Register(hit.Judgement);
+                    // Длинная нота: голова нажата — оценка отложена до отпускания/завершения удержания.
                     _keyboard.Flash(ev.MidiNumber, hit.Judgement);
-                    _spawner.OnHit(hit.NoteId, hit.Judgement);
-                    _hud.Show(_aggregator.CurrentCombo, _aggregator.AccuracyPercent, hit.Judgement);
+                    _spawner.OnHoldStart(hit.NoteId);
+                }
+                else
+                {
+                    RegisterResolved(hit); // обычный тап — оценка сразу
                 }
             }
 
+            // Отпускания клавиш: финализируют активные удержания (раннее → Miss, иначе оценка головы).
+            _releaseBuffer.Clear();
+            _input.CollectReleases(_releaseBuffer);
+            foreach (int midi in _releaseBuffer)
+            {
+                HitEvent resolved = _ctx.Session.PushRelease(midi, _clock.Milliseconds);
+                if (resolved != null) RegisterResolved(resolved);
+            }
+
+            // Удержания, доведённые до хвоста при зажатой клавише, завершаются по времени.
+            foreach (HitEvent resolved in _ctx.Session.TickHolds(_clock.Milliseconds))
+                RegisterResolved(resolved);
+
             if (songTime > _endTime)
                 FinishSession();
+        }
+
+        /// <summary>Учесть финальную оценку ноты (тап или завершённое удержание): счёт, подсветка, HUD.</summary>
+        private void RegisterResolved(HitEvent hit)
+        {
+            _aggregator.Register(hit.Judgement);
+            if (_notesById.TryGetValue(hit.NoteId, out Note n))
+                _keyboard.Flash(n.MidiNumber, hit.Judgement);
+            _spawner.OnHit(hit.NoteId, hit.Judgement);
+            _hud.Show(_aggregator.CurrentCombo, _aggregator.AccuracyPercent, hit.Judgement);
+        }
+
+        private void TogglePause()
+        {
+            if (_paused) { ResumeFromPause(); return; }
+
+            _paused = true;
+            _clock.Stop();
+            _pause.Init(_masterVolume);
+            _pause.Show();
+        }
+
+        private void ResumeFromPause()
+        {
+            _paused = false;
+            _pause.Hide();
+            _clock.Resume();
+        }
+
+        private void ExitToMenu()
+        {
+            _ctx.Session.AbortPlaying(); // выход из паузы без сохранения результата
+            OnExitToMenu?.Invoke();
+        }
+
+        private void ApplyAndSaveVolume(float volume)
+        {
+            _masterVolume = Mathf.Clamp01(volume);
+            if (_synth != null) _synth.SetVolume(_masterVolume);
+            try
+            {
+                UserSettings s = _ctx.UserSettingsRepository.GetSettings(DefaultUserId)
+                                 ?? new UserSettings { UserId = DefaultUserId };
+                s.MasterVolume = _masterVolume;
+                _ctx.UserSettingsRepository.SaveSettings(s);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Racconotes] Не удалось сохранить громкость: {e.Message}");
+            }
         }
 
         private void FinishSession()
@@ -192,8 +293,10 @@ namespace Racconotes.Presentation
             if (_spawner != null) Destroy(_spawner.gameObject);
             if (_overlay != null) Destroy(_overlay);
             if (_input != null) Destroy(_input);
+            if (_synth != null) Destroy(_synth);
             if (_hud != null) Destroy(_hud);
             if (_results != null) Destroy(_results);
+            if (_pause != null) Destroy(_pause);
         }
 
         private T NewChild<T>(string name) where T : Component

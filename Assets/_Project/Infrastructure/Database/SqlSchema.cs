@@ -90,6 +90,7 @@ namespace Racconotes.Infrastructure.Database
                 difficulty_filter_max REAL DEFAULT 10,
                 key_label_mode        TEXT DEFAULT 'off',
                 note_label_mode       TEXT DEFAULT 'off',
+                master_volume         REAL DEFAULT 1,
                 FOREIGN KEY (user_id) REFERENCES Users(user_id)
             );",
 
