@@ -43,6 +43,12 @@ namespace Racconotes.Infrastructure.Database
             }
 
             Migrate(conn);
+
+            // Привести встроенный каталог к актуальному: на свежей БД это no-op (Seed уже вставил его),
+            // на уже созданной runtime-БД — удалит прежние «стандартные» треки и добавит новые, не трогая
+            // импортированные. Гейтим флагом seed, чтобы seed:false-сценарии (тесты миграции) не затрагивались.
+            if (seed)
+                DatabaseSeeder.SyncBuiltInCatalog(conn);
         }
 
         /// <summary>

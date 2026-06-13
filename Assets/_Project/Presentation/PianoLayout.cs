@@ -60,6 +60,36 @@ namespace Racconotes.Presentation
 
         public bool InRange(int midi) => midi >= LowMidi && midi <= HighMidi;
 
+        /// <summary>
+        /// MIDI клавиши под точкой (x, y) в мировых координатах, либо null, если точка вне клавиш.
+        /// Клавиши свисают вниз от линии попадания: белая занимает по Y [hitLineY-whiteHeight, hitLineY],
+        /// чёрная — [hitLineY-blackHeight, hitLineY] и ýже. Чёрные рисуются поверх белых, поэтому
+        /// проверяются первыми (как воспринимается клик мышью). Геометрия по X/ширине совпадает с
+        /// <see cref="PianoKeyboardView"/>. Чистая функция — тестируется в EditMode без рендера.
+        /// </summary>
+        public int? KeyAt(float x, float y, float hitLineY, float whiteHeight, float blackHeight)
+        {
+            // Чёрные клавиши сверху — проверяем первыми.
+            for (int midi = LowMidi; midi <= HighMidi; midi++)
+            {
+                if (!IsBlack(midi)) continue;
+                if (y > hitLineY || y < hitLineY - blackHeight) continue;
+                float half = WidthForMidi(midi) / 2f;
+                float cx = XForMidi(midi);
+                if (x >= cx - half && x <= cx + half) return midi;
+            }
+            // Затем белые.
+            for (int midi = LowMidi; midi <= HighMidi; midi++)
+            {
+                if (IsBlack(midi)) continue;
+                if (y > hitLineY || y < hitLineY - whiteHeight) continue;
+                float half = WidthForMidi(midi) / 2f;
+                float cx = XForMidi(midi);
+                if (x >= cx - half && x <= cx + half) return midi;
+            }
+            return null;
+        }
+
         private static int Mod12(int n) => ((n % 12) + 12) % 12;
 
         /// <summary>Число белых клавиш в [from, to] включительно (to &lt; from → 0).</summary>
