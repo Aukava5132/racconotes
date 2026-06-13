@@ -134,15 +134,15 @@ namespace Racconotes.Presentation
 
             GUILayout.BeginArea(new Rect(box.x + 24f, box.y + 18f, w - 48f, h - 36f));
 
-            GUILayout.Label("Аппликатура", _title);
+            GUILayout.Label("Аплікатура", _title);
             GUILayout.Space(8f);
 
             DrawTrackSelector();
 
             if (_tracks.Count == 0)
-                GUILayout.Label("В библиотеке нет треков.", _sub);
+                GUILayout.Label("У бібліотеці немає треків.", _sub);
             else if (_notes.Count == 0)
-                GUILayout.Label("У трека нет нот.", _sub);
+                GUILayout.Label("У треку немає нот.", _sub);
             else
                 DrawNotes();
 
@@ -167,8 +167,8 @@ namespace Racconotes.Presentation
             if (GUILayout.Button("►", GUILayout.Width(44f), GUILayout.Height(32f))) StepTrack(+1);
             GUILayout.EndHorizontal();
 
-            GUILayout.Label("Палец 1-5 и рука переопределяют авто-аппликатуру и сохраняются в БД. " +
-                            "«Авто» возвращает исходное значение. Переопределённые ноты подсвечены.", _hint);
+            GUILayout.Label("Палець 1-5 і рука перевизначають авто-аплікатуру та зберігаються в БД. " +
+                            "«Авто» повертає початкове значення. Перевизначені ноти підсвічені.", _hint);
             GUILayout.Space(8f);
         }
 

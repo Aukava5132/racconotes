@@ -18,12 +18,12 @@ namespace Racconotes.Composition.Editor
     /// </summary>
     public static class MidiImportTool
     {
-        private const string MenuPath = "Racconotes/Импорт MIDI → БД…";
+        private const string MenuPath = "Racconotes/Імпорт MIDI → БД…";
 
         [MenuItem(MenuPath)]
         public static void ImportMidi()
         {
-            string sourcePath = EditorUtility.OpenFilePanel("Выберите MIDI-файл", "", "mid,midi");
+            string sourcePath = EditorUtility.OpenFilePanel("Виберіть MIDI-файл", "", "mid,midi");
             if (string.IsNullOrEmpty(sourcePath))
                 return; // пользователь отменил выбор
 
@@ -43,13 +43,13 @@ namespace Racconotes.Composition.Editor
                 int noteCount = conn.ExecuteScalar<int>(
                     "SELECT COUNT(*) FROM Notes WHERE track_id = ?;", trackId);
 
-                Debug.Log($"[Racconotes] Импортирован MIDI «{Path.GetFileName(sourcePath)}» → " +
+                Debug.Log($"[Racconotes] Імпортовано MIDI «{Path.GetFileName(sourcePath)}» → " +
                           $"track_id={trackId}, нот: {noteCount}. БД: {dbPath}");
                 EditorUtility.RevealInFinder(dbPath);
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[Racconotes] Ошибка импорта MIDI: {ex.Message}");
+                Debug.LogError($"[Racconotes] Помилка імпорту MIDI: {ex.Message}");
             }
         }
 

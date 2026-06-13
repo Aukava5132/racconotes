@@ -44,14 +44,14 @@ namespace Racconotes.Presentation
             GUILayout.BeginArea(new Rect(box.x + 28f, box.y + 22f, w - 56f, h - 44f));
             GUILayout.Label("Результат", _title);
             GUILayout.Space(14f);
-            GUILayout.Label($"Точность:        {_result.AccuracyPercent:0.0}%", _row);
+            GUILayout.Label($"Точність:        {_result.AccuracyPercent:0.0}%", _row);
             GUILayout.Label($"Perfect (300):   {_result.Score300}", _row);
             GUILayout.Label($"Good (100):      {_result.Score100}", _row);
             GUILayout.Label($"Bad (50):        {_result.Score50}", _row);
             GUILayout.Label($"Miss:            {_result.MissCount}", _row);
             GUILayout.Label($"Макс. комбо:     {_result.MaxCombo}", _row);
             GUILayout.FlexibleSpace();
-            GUILayout.Label("R — играть снова   ·   M — в меню", _hint);
+            GUILayout.Label("R — грати знову   ·   M — у меню", _hint);
             GUILayout.EndArea();
         }
     }

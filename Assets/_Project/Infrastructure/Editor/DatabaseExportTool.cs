@@ -13,13 +13,13 @@ namespace Racconotes.Infrastructure.Editor
     /// </summary>
     public static class DatabaseExportTool
     {
-        private const string MenuPath = "Racconotes/Экспорт seed-БД (notes.db)";
+        private const string MenuPath = "Racconotes/Експорт seed-БД (notes.db)";
 
         [MenuItem(MenuPath)]
         public static void ExportSeedDatabase()
         {
             string path = Export();
-            Debug.Log($"[Racconotes] seed-БД создана: {path}");
+            Debug.Log($"[Racconotes] seed-БД створено: {path}");
             EditorUtility.RevealInFinder(path);
         }
 
@@ -30,7 +30,7 @@ namespace Racconotes.Infrastructure.Editor
         public static void ExportFromCli()
         {
             string path = Export();
-            Debug.Log($"[Racconotes] seed-БД создана (CLI): {path}");
+            Debug.Log($"[Racconotes] seed-БД створено (CLI): {path}");
         }
 
         private static string Export()

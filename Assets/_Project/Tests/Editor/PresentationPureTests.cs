@@ -228,7 +228,7 @@ namespace Racconotes.Tests
             Assert.AreEqual("до", NoteNaming.Solfege(60));
             Assert.AreEqual("до#", NoteNaming.Solfege(61));
             Assert.AreEqual("ре", NoteNaming.Solfege(62));
-            Assert.AreEqual("си", NoteNaming.Solfege(71));
+            Assert.AreEqual("сі", NoteNaming.Solfege(71));
         }
 
         // --- Подписи клавиш/нот (KeyLabelFor, NoteLabels, LabelModeCodec) ---

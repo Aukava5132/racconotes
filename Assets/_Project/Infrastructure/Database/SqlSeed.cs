@@ -20,11 +20,11 @@ namespace Racconotes.Infrastructure.Database
 
             // Треки
             @"INSERT INTO MidiTracks (track_id, filename, title, composer, bpm, tonality, difficulty, note_density)
-              VALUES (1, 'ode_to_joy.mid', 'Ода к радости', 'Beethoven', 120, 'C', 2.5, 2.0);",
+              VALUES (1, 'ode_to_joy.mid', 'Ода до радості', 'Beethoven', 120, 'C', 2.5, 2.0);",
             @"INSERT INTO MidiTracks (track_id, filename, title, composer, bpm, tonality, difficulty, note_density)
-              VALUES (2, 'moonlight.mid', 'Лунная соната', 'Beethoven', 60, 'C#m', 7.0, 1.5);",
+              VALUES (2, 'moonlight.mid', 'Місячна соната', 'Beethoven', 60, 'C#m', 7.0, 1.5);",
             @"INSERT INTO MidiTracks (track_id, filename, title, composer, bpm, tonality, difficulty, note_density)
-              VALUES (3, 'invention_1.mid', 'Инвенция №1', 'Bach', 100, 'C', 4.0, 3.0);",
+              VALUES (3, 'invention_1.mid', 'Інвенція №1', 'Bach', 100, 'C', 4.0, 3.0);",
 
             // Ноты трека 1 (правая рука) — note_id 1..6
             @"INSERT INTO Notes (note_id, track_id, note_index, midi_number, start_time, duration, hand, finger)

@@ -41,7 +41,7 @@ namespace Racconotes.Composition
 
             int trackCount = context.TrackRepository.GetAllTracks().Count();
             Debug.Log($"[Racconotes] БД готова: {dbPath}, схема v{DatabaseInitializer.CurrentSchemaVersion}, " +
-                      $"треков={trackCount}");
+                      $"треків={trackCount}");
         }
 
         public static string ResolveDbPath() =>

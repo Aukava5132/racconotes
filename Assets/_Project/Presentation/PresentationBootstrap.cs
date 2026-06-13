@@ -16,7 +16,7 @@ namespace Racconotes.Presentation
         {
             if (!GameServices.IsReady)
             {
-                Debug.LogError("[Racconotes] Presentation: GameServices не готов (RuntimeBootstrap не отработал?). Приложение не запущено.");
+                Debug.LogError("[Racconotes] Presentation: GameServices не готовий (RuntimeBootstrap не відпрацював?). Застосунок не запущено.");
                 return;
             }
 

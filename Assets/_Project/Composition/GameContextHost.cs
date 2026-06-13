@@ -57,7 +57,7 @@ namespace Racconotes.Composition
             _conn?.Dispose();
             _conn = null;
             GameServices.Reset();
-            Debug.Log("[Racconotes] Соединение с БД закрыто.");
+            Debug.Log("[Racconotes] З'єднання з БД закрито.");
         }
     }
 }

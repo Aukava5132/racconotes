@@ -55,7 +55,7 @@ namespace Racconotes.Presentation
             GUILayout.Space(18f);
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Громкость:", _row, GUILayout.Width(130f));
+            GUILayout.Label("Гучність:", _row, GUILayout.Width(130f));
             float v = GUILayout.HorizontalSlider(_volume, 0f, 1f, GUILayout.Height(24f));
             GUILayout.Space(10f);
             GUILayout.Label($"{Mathf.RoundToInt(_volume * 100f)}%", _row, GUILayout.Width(55f));
@@ -67,14 +67,14 @@ namespace Racconotes.Presentation
             }
 
             GUILayout.Space(22f);
-            if (GUILayout.Button("Продолжить", GUILayout.Height(44f)))
+            if (GUILayout.Button("Продовжити", GUILayout.Height(44f)))
                 OnResume?.Invoke();
             GUILayout.Space(8f);
-            if (GUILayout.Button("В главное меню", GUILayout.Height(44f)))
+            if (GUILayout.Button("До головного меню", GUILayout.Height(44f)))
                 OnExitToMenu?.Invoke();
 
             GUILayout.FlexibleSpace();
-            GUILayout.Label("ESC — продолжить", _hint);
+            GUILayout.Label("ESC — продовжити", _hint);
             GUILayout.EndArea();
         }
     }

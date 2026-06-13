@@ -103,7 +103,7 @@ namespace Racconotes.Presentation
             }
             catch (Exception e)
             {
-                Debug.LogError($"[Racconotes] Не удалось прочитать папку импорта: {e.Message}");
+                Debug.LogError($"[Racconotes] Не вдалося прочитати папку імпорту: {e.Message}");
                 _importFiles = new List<string>();
             }
         }
@@ -120,16 +120,16 @@ namespace Racconotes.Presentation
             {
                 byte[] bytes = File.ReadAllBytes(path);
                 int trackId = _ctx.MidiImport.ImportFromBytes(bytes, Path.GetFileName(path));
-                Debug.Log($"[Racconotes] Импортирован «{Path.GetFileName(path)}» → track_id={trackId}.");
-                _message = $"Импортирован: {Path.GetFileName(path)} (id={trackId}).";
+                Debug.Log($"[Racconotes] Імпортовано «{Path.GetFileName(path)}» → track_id={trackId}.");
+                _message = $"Імпортовано: {Path.GetFileName(path)} (id={trackId}).";
                 LoadTracks();
                 ScanImportFolder();
                 OnLibraryChanged?.Invoke();
             }
             catch (Exception e)
             {
-                Debug.LogError($"[Racconotes] Ошибка импорта «{Path.GetFileName(path)}»: {e.Message}");
-                _message = $"Ошибка импорта «{Path.GetFileName(path)}»: {e.Message}";
+                Debug.LogError($"[Racconotes] Помилка імпорту «{Path.GetFileName(path)}»: {e.Message}");
+                _message = $"Помилка імпорту «{Path.GetFileName(path)}»: {e.Message}";
             }
         }
 
@@ -138,15 +138,15 @@ namespace Racconotes.Presentation
             try
             {
                 _ctx.TrackRepository.DeleteTrack(trackId); // FK ON DELETE CASCADE удалит ноты
-                Debug.Log($"[Racconotes] Удалён трек {trackId}.");
-                _message = $"Трек {trackId} удалён.";
+                Debug.Log($"[Racconotes] Видалено трек {trackId}.");
+                _message = $"Трек {trackId} видалено.";
                 LoadTracks();
                 OnLibraryChanged?.Invoke();
             }
             catch (Exception e)
             {
-                Debug.LogError($"[Racconotes] Ошибка удаления трека {trackId}: {e.Message}");
-                _message = $"Ошибка удаления: {e.Message}";
+                Debug.LogError($"[Racconotes] Помилка видалення трека {trackId}: {e.Message}");
+                _message = $"Помилка видалення: {e.Message}";
             }
             _confirmDeleteTrackId = -1;
         }
@@ -179,7 +179,7 @@ namespace Racconotes.Presentation
 
             GUILayout.BeginArea(new Rect(box.x + 24f, box.y + 18f, w - 48f, h - 36f));
 
-            GUILayout.Label("Настройки", _title);
+            GUILayout.Label("Налаштування", _title);
             GUILayout.Space(8f);
 
             _scroll = GUILayout.BeginScrollView(_scroll);
@@ -204,16 +204,16 @@ namespace Racconotes.Presentation
 
         private void DrawLabelsSection()
         {
-            GUILayout.Label("Подписи при игре", _section);
+            GUILayout.Label("Підписи під час гри", _section);
 
-            LabelMode newKey = ModeRow("Клавиши:", _keyMode);
+            LabelMode newKey = ModeRow("Клавіші:", _keyMode);
             if (newKey != _keyMode) { _keyMode = newKey; SaveSettings(); }
 
-            LabelMode newNote = ModeRow("Летящие ноты:", _noteMode);
+            LabelMode newNote = ModeRow("Летючі ноти:", _noteMode);
             if (newNote != _noteMode) { _noteMode = newNote; SaveSettings(); }
 
-            GUILayout.Label("На белых клавишах текст чёрный, на чёрных — белый. " +
-                            "«Кнопки» подписывает только ноты в пределах двух октав раскладки.", _hint);
+            GUILayout.Label("На білих клавішах текст чорний, на чорних — білий. " +
+                            "«Кнопки» підписує лише ноти в межах двох октав розкладки.", _hint);
             GUILayout.Space(14f);
         }
 
@@ -221,7 +221,7 @@ namespace Racconotes.Presentation
         {
             GUILayout.Label("Звук", _section);
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Громкость:", _row, GUILayout.Width(170f));
+            GUILayout.Label("Гучність:", _row, GUILayout.Width(170f));
             float v = GUILayout.HorizontalSlider(_masterVolume, 0f, 1f, GUILayout.Width(320f), GUILayout.Height(24f));
             GUILayout.Space(12f);
             GUILayout.Label($"{Mathf.RoundToInt(_masterVolume * 100f)}%", _sub, GUILayout.Width(60f));
@@ -256,10 +256,10 @@ namespace Racconotes.Presentation
 
         private void DrawLibrarySection()
         {
-            GUILayout.Label("Библиотека треков", _section);
+            GUILayout.Label("Бібліотека треків", _section);
             if (_tracks.Count == 0)
             {
-                GUILayout.Label("Треков нет.", _sub);
+                GUILayout.Label("Треків немає.", _sub);
                 GUILayout.Space(14f);
                 return;
             }
@@ -267,21 +267,21 @@ namespace Racconotes.Presentation
             foreach (MidiTrack t in _tracks)
             {
                 GUILayout.BeginHorizontal();
-                GUILayout.Label($"{t.Title}   ·   BPM {t.Bpm:0}   ·   сложность {t.Difficulty:0.0}", _sub);
+                GUILayout.Label($"{t.Title}   ·   BPM {t.Bpm:0}   ·   складність {t.Difficulty:0.0}", _sub);
                 GUILayout.FlexibleSpace();
 
                 if (_confirmDeleteTrackId == t.TrackId)
                 {
-                    GUILayout.Label("Удалить?", _sub, GUILayout.Width(80f));
+                    GUILayout.Label("Видалити?", _sub, GUILayout.Width(80f));
                     Color prev = GUI.color;
                     GUI.color = Danger;
-                    if (GUILayout.Button("Да", GUILayout.Width(70f))) DeleteTrack(t.TrackId);
+                    if (GUILayout.Button("Так", GUILayout.Width(70f))) DeleteTrack(t.TrackId);
                     GUI.color = prev;
-                    if (GUILayout.Button("Отмена", GUILayout.Width(90f))) _confirmDeleteTrackId = -1;
+                    if (GUILayout.Button("Скасувати", GUILayout.Width(90f))) _confirmDeleteTrackId = -1;
                 }
                 else
                 {
-                    if (GUILayout.Button("Удалить", GUILayout.Width(110f)))
+                    if (GUILayout.Button("Видалити", GUILayout.Width(110f)))
                         _confirmDeleteTrackId = t.TrackId;
                 }
                 GUILayout.EndHorizontal();
@@ -291,17 +291,17 @@ namespace Racconotes.Presentation
 
         private void DrawImportSection()
         {
-            GUILayout.Label("Импорт MIDI", _section);
-            GUILayout.Label("Положите .mid/.midi файлы в эту папку, затем обновите список:", _sub);
+            GUILayout.Label("Імпорт MIDI", _section);
+            GUILayout.Label("Покладіть файли .mid/.midi у цю папку, потім оновіть список:", _sub);
             GUILayout.Label(ImportDir, _path);
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Открыть папку Import", GUILayout.Width(220f), GUILayout.Height(32f)))
+            if (GUILayout.Button("Відкрити папку Import", GUILayout.Width(220f), GUILayout.Height(32f)))
             {
                 ScanImportFolder(); // гарантирует существование папки
                 UnityEngine.Application.OpenURL("file://" + ImportDir);
             }
-            if (GUILayout.Button("Обновить список", GUILayout.Width(180f), GUILayout.Height(32f)))
+            if (GUILayout.Button("Оновити список", GUILayout.Width(180f), GUILayout.Height(32f)))
                 ScanImportFolder();
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
@@ -309,7 +309,7 @@ namespace Racconotes.Presentation
             GUILayout.Space(4f);
             if (_importFiles.Count == 0)
             {
-                GUILayout.Label("В папке нет MIDI-файлов.", _hint);
+                GUILayout.Label("У папці немає MIDI-файлів.", _hint);
             }
             else
             {
@@ -318,7 +318,7 @@ namespace Racconotes.Presentation
                     GUILayout.BeginHorizontal();
                     GUILayout.Label(Path.GetFileName(file), _sub);
                     GUILayout.FlexibleSpace();
-                    if (GUILayout.Button("Импортировать", GUILayout.Width(150f)))
+                    if (GUILayout.Button("Імпортувати", GUILayout.Width(150f)))
                         ImportFile(file);
                     GUILayout.EndHorizontal();
                 }

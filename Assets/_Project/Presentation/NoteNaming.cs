@@ -11,7 +11,7 @@ namespace Racconotes.Presentation
             { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 
         private static readonly string[] Solfege_ =
-            { "до", "до#", "ре", "ре#", "ми", "фа", "фа#", "соль", "соль#", "ля", "ля#", "си" };
+            { "до", "до#", "ре", "ре#", "мі", "фа", "фа#", "соль", "соль#", "ля", "ля#", "сі" };
 
         /// <summary>Например, 60 → «C4», 61 → «C#4», 69 → «A4», 72 → «C5».</summary>
         public static string Name(int midi)
