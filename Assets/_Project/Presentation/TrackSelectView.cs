@@ -156,7 +156,7 @@ namespace Racconotes.Presentation
             MidiTrack sel = Selected();
             if (sel == null)
             {
-                GUILayout.Label("Под фильтр ничего не подошло — измените диапазоны ниже.", _row);
+                GUILayout.Label("Під фільтр нічого не підійшло — змініть діапазони нижче.", _row);
             }
             else
             {
@@ -165,12 +165,12 @@ namespace Racconotes.Presentation
                 string composer = string.IsNullOrEmpty(sel.Composer) ? "" : $" — {sel.Composer}";
                 GUILayout.Label($"{sel.Title}{composer}", _title);
                 GUILayout.Label(
-                    $"BPM {sel.Bpm:0}   ·   {sel.Tonality}   ·   сложность {sel.Difficulty:0.0}   ·   {sel.NoteDensity:0.0} нот/с",
+                    $"BPM {sel.Bpm:0}   ·   {sel.Tonality}   ·   складність {sel.Difficulty:0.0}   ·   {sel.NoteDensity:0.0} нот/с",
                     _sub);
                 GUILayout.Label(Stars(sel.Difficulty), _starsL);
                 GUILayout.EndVertical();
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("► Играть", _bigPlay, GUILayout.Width(170f), GUILayout.Height(68f)))
+                if (GUILayout.Button("► Грати", _bigPlay, GUILayout.Width(170f), GUILayout.Height(68f)))
                     _onChosen?.Invoke(sel.TrackId);
                 GUILayout.EndHorizontal();
             }
@@ -185,10 +185,10 @@ namespace Racconotes.Presentation
             GUILayout.Label("СТАТИСТИКА", _statTitle);
             GUILayout.Space(8f);
 
-            GUILayout.Label("Точность по треку", _section);
+            GUILayout.Label("Точність за треком", _section);
             if (_progress.Count == 0)
             {
-                GUILayout.Label("Ещё не играли", _sub);
+                GUILayout.Label("Ще не грали", _sub);
             }
             else
             {
@@ -200,30 +200,30 @@ namespace Racconotes.Presentation
             }
             GUILayout.Space(12f);
 
-            GUILayout.Label("Слабые ноты", _section);
+            GUILayout.Label("Слабкі ноти", _section);
             if (_weak.Count == 0)
-                GUILayout.Label("Промахов нет", _sub);
+                GUILayout.Label("Промахів немає", _sub);
             else
                 foreach (WeakSpot s in _weak)
                     GUILayout.Label($"{NoteNaming.Name(s.MidiNumber)}  ·  {HandRu(s.Hand)}  ·  ×{s.MissCount}", _sub);
             GUILayout.Space(12f);
 
-            GUILayout.Label("Рекомендуем", _section);
+            GUILayout.Label("Рекомендуємо", _section);
             GUILayout.Label(_recommend.Count == 0 ? "—" : _recommend[0].Title, _sub);
             GUILayout.Space(12f);
 
-            GUILayout.Label("Задержка", _section);
+            GUILayout.Label("Затримка", _section);
             if (_latency.Count == 0)
-                GUILayout.Label("нет данных", _sub);
+                GUILayout.Label("немає даних", _sub);
             else
                 for (int i = 0; i < Mathf.Min(2, _latency.Count); i++)
                 {
                     LatencyByFinger l = _latency[i];
-                    GUILayout.Label($"{HandRu(l.Hand)} палец {l.Finger}:  {l.AvgDeltaMs:+0.0;-0.0;0} мс", _sub);
+                    GUILayout.Label($"{HandRu(l.Hand)} палець {l.Finger}:  {l.AvgDeltaMs:+0.0;-0.0;0} мс", _sub);
                 }
 
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Подробнее", GUILayout.Height(38f)))
+            if (GUILayout.Button("Детальніше", GUILayout.Height(38f)))
                 _onShowStats?.Invoke();
 
             GUILayout.EndArea();
@@ -233,10 +233,10 @@ namespace Racconotes.Presentation
         {
             string text;
             Color color;
-            if (!improvement.HasValue) { text = "— первый проход"; color = Color.gray; }
+            if (!improvement.HasValue) { text = "— перший прохід"; color = Color.gray; }
             else if (improvement.Value > 0) { text = $"▲ +{improvement.Value:0.0}"; color = new Color(0.4f, 1f, 0.4f); }
             else if (improvement.Value < 0) { text = $"▼ {improvement.Value:0.0}"; color = new Color(1f, 0.45f, 0.45f); }
-            else { text = "= без изменений"; color = Color.white; }
+            else { text = "= без змін"; color = Color.white; }
 
             Color prev = GUI.contentColor;
             GUI.contentColor = color;
@@ -250,7 +250,7 @@ namespace Racconotes.Presentation
             GUILayout.BeginArea(new Rect(r.x + 10f, r.y + 10f, r.width - 20f, r.height - 20f));
             _scroll = GUILayout.BeginScrollView(_scroll);
             if (_tracks.Count == 0)
-                GUILayout.Label("Под фильтр ничего не подошло — измените диапазоны.", _sub);
+                GUILayout.Label("Під фільтр нічого не підійшло — змініть діапазони.", _sub);
             foreach (MidiTrack t in _tracks)
                 DrawTrackRow(t);
             GUILayout.EndScrollView();
@@ -288,16 +288,16 @@ namespace Racconotes.Presentation
 
             bool changed = false;
             GUILayout.BeginHorizontal();
-            _minBpm = IntStepper($"BPM от {_minBpm}", _minBpm, BpmStep, BpmLo, _maxBpm, ref changed);
+            _minBpm = IntStepper($"BPM від {_minBpm}", _minBpm, BpmStep, BpmLo, _maxBpm, ref changed);
             _maxBpm = IntStepper($"BPM до {_maxBpm}", _maxBpm, BpmStep, _minBpm, BpmHi, ref changed);
-            _minDiff = FloatStepper($"Сложн. от {_minDiff:0}", _minDiff, DiffStep, DiffLo, _maxDiff, ref changed);
-            _maxDiff = FloatStepper($"Сложн. до {_maxDiff:0}", _maxDiff, DiffStep, _minDiff, DiffHi, ref changed);
+            _minDiff = FloatStepper($"Складн. від {_minDiff:0}", _minDiff, DiffStep, DiffLo, _maxDiff, ref changed);
+            _maxDiff = FloatStepper($"Складн. до {_maxDiff:0}", _maxDiff, DiffStep, _minDiff, DiffHi, ref changed);
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("✋ Аппликатура", GUILayout.Width(150f)))
+            if (GUILayout.Button("✋ Аплікатура", GUILayout.Width(150f)))
                 _onShowFingerEditor?.Invoke();
-            if (GUILayout.Button("⚙ Настройки", GUILayout.Width(130f)))
+            if (GUILayout.Button("⚙ Налаштування", GUILayout.Width(130f)))
                 _onShowSettings?.Invoke();
-            if (GUILayout.Button("Сбросить фильтр", GUILayout.Width(150f)))
+            if (GUILayout.Button("Скинути фільтр", GUILayout.Width(150f)))
             {
                 _minBpm = BpmLo; _maxBpm = BpmHi; _minDiff = DiffLo; _maxDiff = DiffHi;
                 changed = true;
@@ -306,12 +306,12 @@ namespace Racconotes.Presentation
 
             GUILayout.Space(6f);
             GUILayout.BeginHorizontal();
-            GUILayout.Label($"Найдено: {_tracks.Count}", _label, GUILayout.Width(110f));
-            GUILayout.Label("Сортировка:", _label, GUILayout.Width(90f));
-            if (SortButton("Название", TrackSortKey.Title)) changed = true;
+            GUILayout.Label($"Знайдено: {_tracks.Count}", _label, GUILayout.Width(110f));
+            GUILayout.Label("Сортування:", _label, GUILayout.Width(90f));
+            if (SortButton("Назва", TrackSortKey.Title)) changed = true;
             if (SortButton("BPM", TrackSortKey.Bpm)) changed = true;
-            if (SortButton("Сложность", TrackSortKey.Difficulty)) changed = true;
-            if (GUILayout.Button(_ascending ? "↑ возр." : "↓ убыв.", GUILayout.Width(86f))) { _ascending = !_ascending; changed = true; }
+            if (SortButton("Складність", TrackSortKey.Difficulty)) changed = true;
+            if (GUILayout.Button(_ascending ? "↑ зрост." : "↓ спад.", GUILayout.Width(86f))) { _ascending = !_ascending; changed = true; }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
@@ -373,7 +373,7 @@ namespace Racconotes.Presentation
         }
 
         private static string HandRu(string hand)
-            => hand == "left" ? "левая" : hand == "right" ? "правая" : "—";
+            => hand == "left" ? "ліва" : hand == "right" ? "права" : "—";
 
         private static void Fill(Rect r, Color c)
         {

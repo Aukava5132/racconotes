@@ -44,9 +44,9 @@ namespace Racconotes.Presentation
             switch (mode)
             {
                 case LabelMode.KeyboardKey: return "Кнопки";
-                case LabelMode.NoteName: return "Ноты";
-                case LabelMode.Solfege: return "Сольфеджио";
-                default: return "Выкл";
+                case LabelMode.NoteName: return "Ноти";
+                case LabelMode.Solfege: return "Сольфеджіо";
+                default: return "Вимк";
             }
         }
     }

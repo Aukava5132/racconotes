@@ -60,7 +60,7 @@ namespace Racconotes.Presentation
         {
             if (!GameServices.IsReady)
             {
-                Debug.LogError("[Racconotes] GameServices не готов — нет контекста БД. Геймплей не запущен.");
+                Debug.LogError("[Racconotes] GameServices не готовий — немає контексту БД. Геймплей не запущено.");
                 enabled = false;
                 return;
             }
@@ -79,7 +79,7 @@ namespace Racconotes.Presentation
             if (notes.Count == 0)
             {
                 // Защитная ветка: треки без нот отсеивает AppController до старта, в БД ничего не пишем.
-                Debug.LogWarning($"[Racconotes] В треке {trackId} нет нот — возврат в меню.");
+                Debug.LogWarning($"[Racconotes] У треку {trackId} немає нот — повернення до меню.");
                 OnExitToMenu?.Invoke();
                 return;
             }
@@ -123,7 +123,7 @@ namespace Racconotes.Presentation
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"[Racconotes] Не удалось прочитать настройки подписей: {e.Message}");
+                Debug.LogWarning($"[Racconotes] Не вдалося прочитати налаштування підписів: {e.Message}");
             }
             _synth.SetVolume(_masterVolume);
 
@@ -150,7 +150,7 @@ namespace Racconotes.Presentation
             _paused = false;
             _clock.Start();
 
-            Debug.Log($"[Racconotes] Старт сессии: трек {trackId}, нот {notes.Count}, диапазон клавиатуры MIDI {layout.LowMidi}..{layout.HighMidi}.");
+            Debug.Log($"[Racconotes] Старт сесії: трек {trackId}, нот {notes.Count}, діапазон клавіатури MIDI {layout.LowMidi}..{layout.HighMidi}.");
         }
 
         private void Update()
@@ -270,7 +270,7 @@ namespace Racconotes.Presentation
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"[Racconotes] Не удалось сохранить громкость: {e.Message}");
+                Debug.LogWarning($"[Racconotes] Не вдалося зберегти гучність: {e.Message}");
             }
         }
 
@@ -283,8 +283,8 @@ namespace Racconotes.Presentation
             _hud.SetAccuracy(eval.Result.AccuracyPercent);
             _results.ShowResult(eval.Result);
 
-            Debug.Log($"[Racconotes] Сессия завершена: точность {eval.Result.AccuracyPercent:0.0}%, " +
-                      $"макс. комбо {eval.Result.MaxCombo}. Результат сохранён в БД (ResultId={eval.Result.ResultId}).");
+            Debug.Log($"[Racconotes] Сесію завершено: точність {eval.Result.AccuracyPercent:0.0}%, " +
+                      $"макс. комбо {eval.Result.MaxCombo}. Результат збережено в БД (ResultId={eval.Result.ResultId}).");
         }
 
         private void Cleanup()

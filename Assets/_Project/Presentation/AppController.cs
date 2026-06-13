@@ -25,7 +25,7 @@ namespace Racconotes.Presentation
         {
             if (!GameServices.IsReady)
             {
-                Debug.LogError("[Racconotes] GameServices не готов — нет контекста БД. Приложение не запущено.");
+                Debug.LogError("[Racconotes] GameServices не готовий — немає контексту БД. Застосунок не запущено.");
                 enabled = false;
                 return;
             }
@@ -106,7 +106,7 @@ namespace Racconotes.Presentation
             // Треки без нот играть нечем — остаёмся в меню (защита от пустых записей).
             if (!_ctx.NoteRepository.GetNotesForTrack(trackId).Any())
             {
-                Debug.LogWarning($"[Racconotes] Трек {trackId} без нот — выбор проигнорирован.");
+                Debug.LogWarning($"[Racconotes] Трек {trackId} без нот — вибір проігноровано.");
                 return;
             }
 

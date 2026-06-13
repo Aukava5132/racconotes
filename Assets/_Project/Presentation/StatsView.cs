@@ -119,10 +119,10 @@ namespace Racconotes.Presentation
 
         private void DrawProgressSection()
         {
-            GUILayout.Label("1. Прогресс точности по треку (LAG/OVER)", _section);
+            GUILayout.Label("1. Прогрес точності за треком (LAG/OVER)", _section);
             if (_tracks.Count == 0)
             {
-                GUILayout.Label("В библиотеке нет треков.", _sub);
+                GUILayout.Label("У бібліотеці немає треків.", _sub);
                 GUILayout.Space(12f);
                 return;
             }
@@ -135,7 +135,7 @@ namespace Racconotes.Presentation
 
             if (_progress.Count == 0)
             {
-                GUILayout.Label("Нет проходов. Сыграйте трек несколько раз, чтобы увидеть динамику.", _sub);
+                GUILayout.Label("Немає проходжень. Зіграйте трек кілька разів, щоб побачити динаміку.", _sub);
             }
             else
             {
@@ -155,10 +155,10 @@ namespace Racconotes.Presentation
         {
             string text;
             Color color;
-            if (!improvement.HasValue) { text = "— (первый проход)"; color = Color.gray; }
+            if (!improvement.HasValue) { text = "— (перше проходження)"; color = Color.gray; }
             else if (improvement.Value > 0) { text = $"▲ +{improvement.Value:0.0}"; color = new Color(0.4f, 1f, 0.4f); }
             else if (improvement.Value < 0) { text = $"▼ {improvement.Value:0.0}"; color = new Color(1f, 0.45f, 0.45f); }
-            else { text = "= без изменений"; color = Color.white; }
+            else { text = "= без змін"; color = Color.white; }
 
             Color prev = GUI.contentColor;
             GUI.contentColor = color;
@@ -168,39 +168,39 @@ namespace Racconotes.Presentation
 
         private void DrawWeakSpotsSection()
         {
-            GUILayout.Label("2. Самые сложные ноты — где чаще промах (top-10)", _section);
+            GUILayout.Label("2. Найскладніші ноти — де частіше промах (top-10)", _section);
             if (_weak.Count == 0)
-                GUILayout.Label("Промахов пока нет — сыграйте несколько треков.", _sub);
+                GUILayout.Label("Промахів поки немає — зіграйте кілька треків.", _sub);
             else
                 foreach (WeakSpot s in _weak)
                     GUILayout.Label(
-                        $"{NoteNaming.Name(s.MidiNumber)}   ·   {HandRu(s.Hand)}, палец {s.Finger}   ·   промахов: {s.MissCount}",
+                        $"{NoteNaming.Name(s.MidiNumber)}   ·   {HandRu(s.Hand)}, палець {s.Finger}   ·   промахів: {s.MissCount}",
                         _sub);
             GUILayout.Space(12f);
         }
 
         private void DrawRecommendSection()
         {
-            GUILayout.Label("3. Рекомендованные треки (давно не играли + по уровню)", _section);
+            GUILayout.Label("3. Рекомендовані треки (давно не грали + за рівнем)", _section);
             if (_recommend.Count == 0)
-                GUILayout.Label("Нет рекомендаций под ваш уровень.", _sub);
+                GUILayout.Label("Немає рекомендацій під ваш рівень.", _sub);
             else
                 foreach (TrackRecommendation r in _recommend)
-                    GUILayout.Label($"{r.Title}   ·   сложность {r.Difficulty:0.0}   ·   BPM {r.Bpm:0}", _sub);
+                    GUILayout.Label($"{r.Title}   ·   складність {r.Difficulty:0.0}   ·   BPM {r.Bpm:0}", _sub);
             GUILayout.Space(12f);
         }
 
         private void DrawLatencySection()
         {
-            GUILayout.Label("4. Средняя задержка по руке/пальцу (AVG delta_ms)", _section);
+            GUILayout.Label("4. Середня затримка за рукою/пальцем (AVG delta_ms)", _section);
             if (_latency.Count == 0)
-                GUILayout.Label("Недостаточно данных о попаданиях.", _sub);
+                GUILayout.Label("Недостатньо даних про влучання.", _sub);
             else
                 foreach (LatencyByFinger l in _latency)
                 {
-                    string dir = l.AvgDeltaMs > 0 ? "опаздывает" : l.AvgDeltaMs < 0 ? "торопится" : "ровно";
+                    string dir = l.AvgDeltaMs > 0 ? "запізнюється" : l.AvgDeltaMs < 0 ? "поспішає" : "рівно";
                     GUILayout.Label(
-                        $"{HandRu(l.Hand)}, палец {l.Finger}   ·   {l.AvgDeltaMs:+0.0;-0.0;0} мс ({dir})   ·   нажатий: {l.HitCount}",
+                        $"{HandRu(l.Hand)}, палець {l.Finger}   ·   {l.AvgDeltaMs:+0.0;-0.0;0} мс ({dir})   ·   натискань: {l.HitCount}",
                         _sub);
                 }
             GUILayout.Space(4f);
@@ -208,8 +208,8 @@ namespace Racconotes.Presentation
 
         private static string HandRu(string hand)
         {
-            if (hand == "left") return "левая";
-            if (hand == "right") return "правая";
+            if (hand == "left") return "ліва";
+            if (hand == "right") return "права";
             return "—";
         }
     }
