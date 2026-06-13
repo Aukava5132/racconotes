@@ -1,6 +1,7 @@
 using Racconotes.Application;
 using Racconotes.Application.Engine;
 using Racconotes.Application.Midi;
+using Racconotes.Application.Scoring;
 using Racconotes.Application.Stats;
 using Racconotes.Infrastructure.Repositories;
 using SQLite;
@@ -28,7 +29,10 @@ namespace Racconotes.Composition
             var settingsRepo = new SqliteUserSettingsRepository(conn);
             var fingerRepo = new SqliteUserFingerAssignmentRepository(conn);
 
-            var session = new SessionController(noteRepo, resultRepo, new GameEngine());
+            // Живой геймплей судится смягчёнными окнами (90/160/300) — «свобода по задержкам».
+            // Тесты конструируют GameEngine/ScoreModel напрямую и остаются на Default (50/100/200).
+            var session = new SessionController(noteRepo, resultRepo,
+                new GameEngine(windows: JudgementWindows.Relaxed));
             var midiImport = new MidiImportService(trackRepo, noteRepo);
             var statsAnalyzer = new StatsAnalyzer();
 

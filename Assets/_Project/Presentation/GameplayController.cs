@@ -34,6 +34,7 @@ namespace Racconotes.Presentation
         private SongClock _clock;
         private NoteSpawner _spawner;
         private KeyboardInputSource _input;
+        private MouseInputSource _mouse;
         private PianoKeyboardView _keyboard;
         private PianoSynth _synth;
         private LabelOverlay _overlay;
@@ -97,7 +98,8 @@ namespace Racconotes.Presentation
             _keyboard = NewChild<PianoKeyboardView>("Keyboard");
             _keyboard.Build(layout, HitLineY);
 
-            _missWindowSeconds = JudgementWindows.Default.BadMs / 1000.0;
+            // Визуальное окно «промаха» совпадает с окном регистрации движка (Relaxed.BadMs = 300 мс).
+            _missWindowSeconds = JudgementWindows.Relaxed.BadMs / 1000.0;
 
             _clock = new SongClock(LeadInSeconds);
 
@@ -106,6 +108,10 @@ namespace Racconotes.Presentation
 
             _input = gameObject.AddComponent<KeyboardInputSource>();
             _input.Init(layout.LowMidi, _clock);
+
+            // Второй источник ввода — мышь (клик/удержание по клавишам). Геометрия из того же layout.
+            _mouse = gameObject.AddComponent<MouseInputSource>();
+            _mouse.Init(layout, HitLineY, _clock);
 
             // Озвучка нот процедурным синтезом под диапазон клавиатуры (без ассетов).
             _synth = gameObject.AddComponent<PianoSynth>();
@@ -187,6 +193,7 @@ namespace Racconotes.Presentation
 
             _pressBuffer.Clear();
             _input.CollectPresses(_pressBuffer);
+            _mouse.CollectPresses(_pressBuffer); // клик мыши = нажатие, как с клавиатуры
             foreach (InputEvent ev in _pressBuffer)
             {
                 _keyboard.FlashPress(ev.MidiNumber);
@@ -210,6 +217,7 @@ namespace Racconotes.Presentation
             // Отпускания клавиш: финализируют активные удержания (раннее → Miss, иначе оценка головы).
             _releaseBuffer.Clear();
             _input.CollectReleases(_releaseBuffer);
+            _mouse.CollectReleases(_releaseBuffer); // отпускание кнопки мыши финализирует удержание
             foreach (int midi in _releaseBuffer)
             {
                 HitEvent resolved = _ctx.Session.PushRelease(midi, _clock.Milliseconds);
@@ -293,6 +301,7 @@ namespace Racconotes.Presentation
             if (_spawner != null) Destroy(_spawner.gameObject);
             if (_overlay != null) Destroy(_overlay);
             if (_input != null) Destroy(_input);
+            if (_mouse != null) Destroy(_mouse);
             if (_synth != null) Destroy(_synth);
             if (_hud != null) Destroy(_hud);
             if (_results != null) Destroy(_results);

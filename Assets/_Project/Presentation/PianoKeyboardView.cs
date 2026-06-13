@@ -11,8 +11,10 @@ namespace Racconotes.Presentation
     /// </summary>
     public sealed class PianoKeyboardView : MonoBehaviour
     {
-        private const float WhiteHeight = 3.0f;
-        private const float BlackHeight = 1.9f;
+        /// <summary>Высота белой клавиши в мировых единицах (нужна и для хит-теста мыши, см. <see cref="MouseInputSource"/>).</summary>
+        public const float WhiteHeight = 3.0f;
+        /// <summary>Высота чёрной клавиши в мировых единицах.</summary>
+        public const float BlackHeight = 1.9f;
         private const float FlashTime = 0.18f;
 
         private PianoLayout _layout;

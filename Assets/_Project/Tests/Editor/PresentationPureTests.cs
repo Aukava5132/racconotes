@@ -53,6 +53,57 @@ namespace Racconotes.Tests
             Assert.Less(layout.WidthForMidi(61), layout.WidthForMidi(60)); // C# уже C
         }
 
+        // --- PianoLayout.KeyAt (хит-тест клика мышью; высоты совпадают с PianoKeyboardView) ---
+
+        [Test]
+        public void KeyAt_WhiteKeyCenter_ReturnsThatWhite()
+        {
+            var layout = new PianoLayout(new[] { 60, 71 });
+            float x = layout.XForMidi(62); // D4 (белая)
+            int? midi = layout.KeyAt(x, -1.5f, 0f,
+                PianoKeyboardView.WhiteHeight, PianoKeyboardView.BlackHeight);
+            Assert.AreEqual(62, midi);
+        }
+
+        [Test]
+        public void KeyAt_BlackKeyCenter_ReturnsBlack()
+        {
+            var layout = new PianoLayout(new[] { 60, 71 });
+            float x = layout.XForMidi(61); // C#4 (чёрная) — лежит сверху на стыке белых
+            int? midi = layout.KeyAt(x, -0.5f, 0f,
+                PianoKeyboardView.WhiteHeight, PianoKeyboardView.BlackHeight);
+            Assert.AreEqual(61, midi);
+        }
+
+        [Test]
+        public void KeyAt_BelowBlackBand_FallsThroughToWhite()
+        {
+            var layout = new PianoLayout(new[] { 60, 71 });
+            float x = layout.XForMidi(61); // x чёрной C#4
+            // y ниже полосы чёрной (−1.9..0), но в полосе белой (−3..0) → должна вернуться белая.
+            int? midi = layout.KeyAt(x, -2.5f, 0f,
+                PianoKeyboardView.WhiteHeight, PianoKeyboardView.BlackHeight);
+            Assert.IsTrue(midi.HasValue);
+            Assert.IsFalse(PianoLayout.IsBlack(midi.Value),
+                "Ниже полосы чёрной клавиши клик должен попасть на белую.");
+        }
+
+        [Test]
+        public void KeyAt_AboveHitLine_ReturnsNull()
+        {
+            var layout = new PianoLayout(new[] { 60, 71 });
+            Assert.IsNull(layout.KeyAt(layout.XForMidi(60), 1f, 0f,
+                PianoKeyboardView.WhiteHeight, PianoKeyboardView.BlackHeight));
+        }
+
+        [Test]
+        public void KeyAt_OutsideKeyboard_ReturnsNull()
+        {
+            var layout = new PianoLayout(new[] { 60, 71 });
+            Assert.IsNull(layout.KeyAt(layout.LeftEdge - 5f, -1f, 0f,
+                PianoKeyboardView.WhiteHeight, PianoKeyboardView.BlackHeight));
+        }
+
         // --- PianoKeyMap ---
 
         [Test]
